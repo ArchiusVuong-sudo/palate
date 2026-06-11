@@ -1,0 +1,4 @@
+.agent-workspace
+research
+*.log
+scripts/test-chrome-mcp.mjs

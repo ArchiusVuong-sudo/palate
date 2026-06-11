@@ -9,11 +9,16 @@ export const pool: Pool =
   global.__palatePool ??
   new Pool({
     connectionString: process.env.DATABASE_URL,
-    max: 8,
-    idleTimeoutMillis: 30_000,
+    // serverless: keep per-instance connections tiny and release them fast —
+    // on Vercel we sit behind Supabase's transaction-mode pooler (port 6543),
+    // which multiplexes many clients over a small backend pool
+    max: process.env.VERCEL ? 3 : 8,
+    idleTimeoutMillis: process.env.VERCEL ? 8_000 : 30_000,
+    allowExitOnIdle: Boolean(process.env.VERCEL),
   });
 
-if (process.env.NODE_ENV !== "production") global.__palatePool = pool;
+// cache across HMR (dev) AND across warm lambda invocations (Vercel)
+global.__palatePool = pool;
 
 export async function q<T = Record<string, unknown>>(
   text: string,
