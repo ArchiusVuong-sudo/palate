@@ -248,39 +248,38 @@ export function OverviewView({
             <div className="mt-3 flex gap-3 overflow-x-auto pb-1.5">
               {creative.map((a) => (
                 <HoverDetail key={a.id} side="top" width={300} content={<AssetHoverCard asset={a} />}>
-                  <div className="relative shrink-0">
-                    {a.kind === "video" ? (
-                      <>
+                  {/* label sits BELOW the tile — story renders carry their own baked-in text */}
+                  <div className="shrink-0 w-28 group/thumb">
+                    <div className="relative h-36 w-28 rounded-xl overflow-hidden border border-line">
+                      {a.kind === "video" ? (
                         <video
                           src={a.public_url ?? undefined}
                           muted
                           playsInline
                           preload="metadata"
-                          className="h-28 w-auto min-w-20 rounded-xl border border-line object-cover"
+                          className="h-full w-full object-cover transition-transform duration-300 group-hover/thumb:scale-[1.04]"
                         />
-                        <span className="absolute top-1.5 right-1.5 h-5 w-5 rounded-full bg-black/60 backdrop-blur border border-line flex items-center justify-center">
-                          <Film className="h-3 w-3 text-amber" />
+                      ) : (
+                        /* eslint-disable-next-line @next/next/no-img-element */
+                        <img
+                          src={a.public_url ?? ""}
+                          alt={a.variant_label ?? "creative asset"}
+                          loading="lazy"
+                          decoding="async"
+                          className="h-full w-full object-cover transition-transform duration-300 group-hover/thumb:scale-[1.04]"
+                        />
+                      )}
+                      {a.kind === "video" && (
+                        <span className="absolute top-1.5 right-1.5 h-5 w-5 rounded-full bg-black/55 backdrop-blur flex items-center justify-center">
+                          <Film className="h-3 w-3 text-white/90" />
                         </span>
-                      </>
-                    ) : (
-                      /* eslint-disable-next-line @next/next/no-img-element */
-                      <img
-                        src={a.public_url ?? ""}
-                        alt={a.variant_label ?? "creative asset"}
-                        loading="lazy"
-                        decoding="async"
-                        className="h-28 w-auto min-w-20 rounded-xl border border-line object-cover"
-                      />
-                    )}
-                    {a.variant_label && (
-                      <Badge tone="accent" className="absolute bottom-1.5 left-1.5 px-1.5 py-0 text-[9px] bg-black/55 backdrop-blur">
-                        {a.variant_label}
-                      </Badge>
-                    )}
+                      )}
+                    </div>
+                    <p className="mt-1.5 px-0.5 text-[10px] font-medium leading-tight text-cream truncate">
+                      {a.variant_label ?? (a.kind === "video" ? "video" : "image")}
+                    </p>
                     {a.format && (
-                      <span className="absolute bottom-1.5 right-1.5 rounded-full border border-line bg-black/60 backdrop-blur px-1.5 py-0.5 font-mono text-[9px] text-cream-faint">
-                        {FORMAT_LABELS[a.format] ?? a.format}
-                      </span>
+                      <p className="px-0.5 font-mono text-[8.5px] text-cream-faint truncate">{FORMAT_LABELS[a.format] ?? a.format}</p>
                     )}
                   </div>
                 </HoverDetail>

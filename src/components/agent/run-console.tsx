@@ -250,12 +250,12 @@ function ToolRow({ seg }: { seg: Extract<TimelineSegment, { kind: "tool" }> }) {
       {open && (
         <div className="px-3 pb-2.5 grid gap-1.5 border-t border-line/50 pt-2">
           {seg.input !== undefined && (
-            <pre className="text-[10px] font-mono text-cream-faint bg-black/30 rounded-lg p-2 overflow-x-auto max-h-36">
+            <pre className="text-[10px] font-mono text-cream-muted bg-[rgba(43,34,26,0.05)] rounded-lg p-2 overflow-x-auto max-h-36">
               {JSON.stringify(seg.input, null, 1)}
             </pre>
           )}
           {seg.resultSummary && (
-            <pre className={cn("text-[10px] font-mono rounded-lg p-2 overflow-x-auto max-h-36 bg-black/30", seg.isError ? "text-bad" : "text-eucalyptus/90")}>
+            <pre className={cn("text-[10px] font-mono rounded-lg p-2 overflow-x-auto max-h-36 bg-[rgba(43,34,26,0.05)]", seg.isError ? "text-bad" : "text-eucalyptus")}>
               {seg.resultSummary}
             </pre>
           )}

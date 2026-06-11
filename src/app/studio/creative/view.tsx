@@ -436,7 +436,11 @@ export function CreativeView({
         groups.map((group) => {
           const stories = groupStoryItems(group);
           const groupExpanded = expandedGroups.has(group.key);
-          const shownItems = groupExpanded ? group.items : group.items.slice(0, GROUP_PREVIEW);
+          /* media and captions render separately — mixing text cards into the
+             image masonry leaves ragged holes */
+          const media = group.items.filter((a) => a.kind !== "caption");
+          const captions = group.items.filter((a) => a.kind === "caption");
+          const shownMedia = groupExpanded ? media : media.slice(0, GROUP_PREVIEW);
           return (
           <section key={group.key} className="mt-8">
             <header className="flex items-baseline gap-2.5 flex-wrap">
@@ -470,31 +474,33 @@ export function CreativeView({
                 </Button>
               )}
             </header>
-            <div className="columns-2 lg:columns-3 gap-4 mt-3">
-              {shownItems.map((a, i) => (
-                <motion.div
-                  key={a.id}
-                  initial={{ opacity: 0, y: 12 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: Math.min(i * 0.05, 0.45) }}
-                  className="mb-4 break-inside-avoid"
-                >
-                  <AssetCard
-                    asset={a}
-                    acting={acting === a.id}
-                    busy={busy}
-                    onSelect={() => setStatus(a, "selected")}
-                    onReject={() => setStatus(a, "rejected")}
-                    onRefine={() => openRefine(a)}
-                    onOpen={() => {
-                      setLightboxTab("asset");
-                      setLightbox({ key: group.key, id: a.id });
-                    }}
-                  />
-                </motion.div>
-              ))}
-            </div>
-            {group.items.length > GROUP_PREVIEW &&
+            {shownMedia.length > 0 && (
+              <div className="columns-2 lg:columns-3 gap-4 mt-3">
+                {shownMedia.map((a, i) => (
+                  <motion.div
+                    key={a.id}
+                    initial={{ opacity: 0, y: 12 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: Math.min(i * 0.05, 0.45) }}
+                    className="mb-4 break-inside-avoid"
+                  >
+                    <AssetCard
+                      asset={a}
+                      acting={acting === a.id}
+                      busy={busy}
+                      onSelect={() => setStatus(a, "selected")}
+                      onReject={() => setStatus(a, "rejected")}
+                      onRefine={() => openRefine(a)}
+                      onOpen={() => {
+                        setLightboxTab("asset");
+                        setLightbox({ key: group.key, id: a.id });
+                      }}
+                    />
+                  </motion.div>
+                ))}
+              </div>
+            )}
+            {media.length > GROUP_PREVIEW &&
               (groupExpanded ? (
                 <div className="mt-1 flex justify-center">
                   <button
@@ -510,10 +516,34 @@ export function CreativeView({
                 <ShowMoreButton
                   className="mt-1"
                   label="Show all"
-                  remaining={group.items.length - GROUP_PREVIEW}
+                  remaining={media.length - GROUP_PREVIEW}
                   onClick={() => toggleGroup(group.key)}
                 />
               ))}
+            {captions.length > 0 && (
+              <div className="mt-4">
+                <p className="flex items-center gap-1.5 text-[10px] uppercase tracking-[0.14em] text-cream-faint">
+                  <Quote className="h-3 w-3" /> Captions
+                </p>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-3 mt-2 items-start">
+                  {captions.map((a) => (
+                    <AssetCard
+                      key={a.id}
+                      asset={a}
+                      acting={acting === a.id}
+                      busy={busy}
+                      onSelect={() => setStatus(a, "selected")}
+                      onReject={() => setStatus(a, "rejected")}
+                      onRefine={() => openRefine(a)}
+                      onOpen={() => {
+                        setLightboxTab("asset");
+                        setLightbox({ key: group.key, id: a.id });
+                      }}
+                    />
+                  ))}
+                </div>
+              </div>
+            )}
           </section>
           );
         })
@@ -596,7 +626,7 @@ export function CreativeView({
                         <Copy className="h-3 w-3" /> copy
                       </button>
                     </div>
-                    <p className="mt-1.5 font-mono text-[11px] text-cream-muted leading-relaxed whitespace-pre-wrap max-h-44 overflow-y-auto rounded-lg bg-black/30 border border-line p-2.5">
+                    <p className="mt-1.5 font-mono text-[11px] text-cream-muted leading-relaxed whitespace-pre-wrap max-h-44 overflow-y-auto rounded-lg bg-[rgba(43,34,26,0.05)] border border-line p-2.5">
                       {lightboxData.asset.prompt}
                     </p>
                   </>
@@ -651,7 +681,7 @@ export function CreativeView({
               </aside>
             </div>
             ) : (
-            <div className="relative mt-4 flex items-center justify-center overflow-hidden rounded-xl border border-line bg-black/30 py-8">
+            <div className="relative mt-4 flex items-center justify-center overflow-hidden rounded-xl border border-line bg-[rgba(43,34,26,0.04)] py-8">
               {/* subtle radial glow behind the phone */}
               <div
                 aria-hidden
@@ -712,7 +742,7 @@ export function CreativeView({
               <img
                 src={refining.public_url}
                 alt={refining.variant_label ?? "asset to refine"}
-                className="w-full h-auto max-h-72 object-contain rounded-xl border border-line bg-black/30 mt-4"
+                className="w-full h-auto max-h-72 object-contain rounded-xl border border-line bg-[rgba(43,34,26,0.05)] mt-4"
               />
             )}
 
@@ -969,7 +999,7 @@ function BrandLibrary({ items }: { items: Asset[] }) {
                   />
                   {a.variant_label && (
                     <span className="absolute bottom-1.5 left-1.5 max-w-[calc(100%-12px)]">
-                      <Badge tone="accent" className="bg-black/65 backdrop-blur max-w-full !px-2">
+                      <Badge tone="accent" className="bg-black/65 backdrop-blur max-w-full !px-2 text-white/90 border-white/25">
                         <span className="truncate">{a.variant_label}</span>
                       </Badge>
                     </span>
@@ -979,7 +1009,7 @@ function BrandLibrary({ items }: { items: Asset[] }) {
                     title="Remove from library"
                     disabled={deleting === a.id}
                     onClick={() => remove(a)}
-                    className="absolute top-1.5 right-1.5 h-5 w-5 rounded-full bg-black/70 backdrop-blur border border-line text-cream-muted hover:text-bad flex items-center justify-center opacity-0 group-hover/ref:opacity-100 transition-opacity disabled:opacity-40"
+                    className="absolute top-1.5 right-1.5 h-5 w-5 rounded-full bg-black/70 backdrop-blur border border-white/25 text-white/80 hover:text-bad flex items-center justify-center opacity-0 group-hover/ref:opacity-100 transition-opacity disabled:opacity-40"
                   >
                     <X className="h-3 w-3" />
                   </button>
@@ -1060,11 +1090,11 @@ function AssetCard({
             />
             {asset.prompt && (
               <span className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/30 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-200 flex flex-col justify-end p-3">
-                <span className="font-mono text-[10px] text-cream-muted leading-relaxed line-clamp-3">
+                <span className="font-mono text-[10px] text-white/85 leading-relaxed line-clamp-3">
                   {asset.prompt}
                 </span>
                 {asset.model && (
-                  <span className="mt-1.5 self-start rounded-full border border-line bg-black/50 px-2 py-0.5 font-mono text-[9px] text-cream-faint">
+                  <span className="mt-1.5 self-start rounded-full border border-white/25 bg-black/50 px-2 py-0.5 font-mono text-[9px] text-white/75">
                     {asset.model}
                   </span>
                 )}
@@ -1250,7 +1280,7 @@ function IconBtn({
       onClick={onClick}
       disabled={disabled}
       className={cn(
-        "h-7 w-7 rounded-lg bg-black/60 backdrop-blur border border-line text-cream-muted flex items-center justify-center transition-colors disabled:opacity-40 disabled:pointer-events-none",
+        "h-7 w-7 rounded-lg bg-black/60 backdrop-blur border border-white/25 text-white/85 flex items-center justify-center transition-colors disabled:opacity-40 disabled:pointer-events-none",
         className
       )}
     >
@@ -1274,7 +1304,7 @@ function NavArrow({
       onClick={onClick}
       title={side === "left" ? "Previous variant" : "Next variant"}
       className={cn(
-        "absolute top-1/2 -translate-y-1/2 h-9 w-9 rounded-full bg-black/60 backdrop-blur border border-line text-cream-muted hover:text-cream flex items-center justify-center transition-colors",
+        "absolute top-1/2 -translate-y-1/2 h-9 w-9 rounded-full bg-black/60 backdrop-blur border border-white/25 text-white/85 hover:text-white flex items-center justify-center transition-colors",
         side === "left" ? "left-2" : "right-2"
       )}
     >
