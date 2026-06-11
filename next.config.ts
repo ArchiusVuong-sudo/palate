@@ -1,7 +1,12 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
-  /* config options here */
+  serverExternalPackages: ["@anthropic-ai/claude-agent-sdk", "pg", "nodemailer", "@google/genai"],
+  images: {
+    remotePatterns: [
+      { protocol: "https", hostname: "qannfgylnsqmyocsfyse.supabase.co" },
+    ],
+  },
 };
 
 export default nextConfig;
