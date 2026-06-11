@@ -366,9 +366,13 @@ export function CreativeView({
         </Card>
       )}
 
+      {/* gallery left, agent's canvas in a sticky rail right — the notes belong
+          beside the images, not buried below the fold */}
+      <div className={cn("mt-6", blocks.length > 0 && "lg:grid lg:grid-cols-[minmax(0,1fr)_330px] lg:gap-6 lg:items-start")}>
+      <div className="min-w-0">
       {/* catalogue control bar — kind, status and format filters */}
       {creativeAssets.length > 0 && (
-        <div className="sticky top-0 z-20 mt-6 flex flex-wrap items-center gap-1.5 rounded-2xl border border-line bg-[rgba(255,253,248,0.82)] backdrop-blur-xl px-3 py-2.5">
+        <div className="sticky top-0 z-20 flex flex-wrap items-center gap-1.5 rounded-2xl border border-line bg-[rgba(255,253,248,0.82)] backdrop-blur-xl px-3 py-2.5">
           {KIND_PILLS.map((k) => (
             <Pill key={k.id} active={kindFilter === k.id} onClick={() => setKindFilter(k.id)}>
               {k.label}
@@ -548,18 +552,20 @@ export function CreativeView({
           );
         })
       )}
+      </div>
 
-      {/* creative canvas blocks */}
       {blocks.length > 0 && (
-        <section className="mt-10">
-          <p className="text-[11px] uppercase tracking-[0.16em] text-cream-faint">Creative canvas</p>
-          <div className="grid md:grid-cols-2 gap-4 mt-3">
+        <aside className="mt-10 lg:mt-0 lg:sticky lg:top-0 lg:max-h-[calc(100vh-6.5rem)] lg:overflow-y-auto min-w-0 lg:pr-0.5">
+          <p className="text-[11px] uppercase tracking-[0.16em] text-cream-faint">Agent&apos;s canvas</p>
+          <p className="text-[11px] text-cream-muted mt-0.5">The thinking behind this gallery — directions, picks and why</p>
+          <div className="grid grid-cols-1 gap-4 mt-3">
             {blocks.map((b) => (
-              <BlockRenderer key={b.id} block={b} />
+              <BlockRenderer key={b.id} block={b} compact />
             ))}
           </div>
-        </section>
+        </aside>
       )}
+      </div>
 
       {/* ───── lightbox ───── */}
       <Modal open={!!lightboxData} onClose={() => setLightbox(null)} wide>
