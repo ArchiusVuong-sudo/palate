@@ -61,6 +61,10 @@ export function AgentDock() {
         setRuns(runsRes.runs ?? []);
 
         const pending = apprRes.count ?? 0;
+        // keep the shell's topbar alert in sync (the dock pill alone is easy to miss)
+        window.dispatchEvent(new CustomEvent("palate:pending", {
+          detail: { count: pending, question: apprRes.newest?.question ?? null },
+        }));
         document.title = pending > 0
           ? `(${pending}) Palate — decision needed`
           : "Palate — AI marketing studio for restaurants";
@@ -111,7 +115,8 @@ export function AgentDock() {
   if (!showPill) return null;
 
   return (
-    <div className="fixed bottom-4 left-4 z-[70]">
+    /* left-60 clears the sidebar (w-56) so the pill never collides with the brand footer */
+    <div className="fixed bottom-4 left-60 z-[70]">
       <AnimatePresence mode="popLayout">
         {expandedId ? (
           <motion.div

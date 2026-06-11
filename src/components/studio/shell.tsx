@@ -46,6 +46,10 @@ export function StudioShell({
   const [copilotOpen, setCopilotOpen] = React.useState(true);
   const [paletteOpen, setPaletteOpen] = React.useState(false);
   const [ask, setAsk] = React.useState<{ prompt: string; nonce: number } | null>(null);
+  const [pending, setPending] = React.useState<{ count: number; question: string | null }>({
+    count: badges?.approvals ?? 0,
+    question: null,
+  });
   const gChordRef = React.useRef<number>(0);
 
   React.useEffect(() => {
@@ -64,6 +68,16 @@ export function StudioShell({
     };
     window.addEventListener("palate:ask", onAsk);
     return () => window.removeEventListener("palate:ask", onAsk);
+  }, []);
+
+  // pending decisions — seeded server-side, kept live by the dock's poll
+  React.useEffect(() => {
+    const onPending = (e: Event) => {
+      const d = (e as CustomEvent).detail ?? {};
+      setPending({ count: Number(d.count ?? 0), question: d.question ? String(d.question) : null });
+    };
+    window.addEventListener("palate:pending", onPending);
+    return () => window.removeEventListener("palate:pending", onPending);
   }, []);
 
   // global keyboard: ⌘K palette + g-chord navigation
@@ -152,6 +166,16 @@ export function StudioShell({
         <header className="h-16 shrink-0 border-b border-line flex items-center px-6 gap-3 bg-[rgba(255,253,248,0.5)] backdrop-blur-xl">
           <Breadcrumb pathname={pathname} />
           <div className="ml-auto flex items-center gap-2">
+            {pending.count > 0 && (
+              <button
+                onClick={() => router.push("/studio/review")}
+                title={pending.question ?? "The agent is waiting on your decision"}
+                className="accent-ring inline-flex items-center gap-2 rounded-xl h-9 px-3.5 text-xs font-semibold border border-[rgba(201,127,61,0.5)] bg-[rgba(196,99,58,0.1)] text-terracotta hover:bg-[rgba(196,99,58,0.16)] transition-colors"
+              >
+                <span className="dot dot-pulse bg-amber" />
+                {pending.count} decision{pending.count > 1 ? "s" : ""} waiting
+              </button>
+            )}
             <button
               onClick={() => setPaletteOpen(true)}
               className="inline-flex items-center gap-2 rounded-xl h-9 px-3 text-xs text-cream-faint border border-line hover:border-line-strong hover:text-cream-muted transition-colors"
