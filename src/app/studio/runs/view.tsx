@@ -9,18 +9,38 @@ import { useRouter } from "next/navigation";
 import { AnimatePresence, motion } from "framer-motion";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
-import { Activity, ChevronDown, Eye, Timer } from "lucide-react";
+import { toast } from "sonner";
+import { Activity, ChevronDown, Eye, MessageSquarePlus, Timer } from "lucide-react";
 import { Badge, Button, Card, EmptyState, Modal, SectionTitle } from "@/components/ui/primitives";
 import { HoverDetail, HoverRow } from "@/components/ui/hover-detail";
 import { LazySentinel, ShowMoreButton } from "@/components/ui/lazy-list";
 import { usePaged } from "@/components/ui/use-paged";
-import { MetricCard } from "@/components/charts/charts";
+import { Donut, MetricCard, TrendArea } from "@/components/charts/charts";
+import { AskPalateButton } from "@/components/agent/ask-palate";
 import { RunConsole } from "@/components/agent/run-console";
 import { useRunStream } from "@/components/agent/use-run-stream";
 import type { AgentRun } from "@/lib/queries";
 import { cn, fmtDateTime, fmtUsd, timeAgo } from "@/lib/format";
 
 export type RunRow = AgentRun & { prompt: string | null };
+
+/** Shape of getRunTotals() — aggregate stats across every run for the brand. */
+export type RunTotals = {
+  total: number;
+  completed: number;
+  failed: number;
+  active: number;
+  total_cost: number;
+  total_turns: number;
+  input_tokens: string;
+  output_tokens: string;
+  avg_minutes: number | null;
+};
+
+/** Shape of getRunDaily() rows — one point per day. */
+export type RunDailyPoint = { label: string; runs: number; cost: number };
+
+const FINISHED_STATUSES = new Set(["completed", "failed", "cancelled"]);
 
 type BadgeTone = "neutral" | "good" | "bad" | "warn" | "info" | "accent" | "agent";
 
@@ -57,7 +77,15 @@ function fmtDuration(start: string, end: string | null): string | null {
   return `${Math.floor(s / 60)}m ${String(s % 60).padStart(2, "0")}s`;
 }
 
-export function RunsView({ runs }: { runs: RunRow[] }) {
+export function RunsView({
+  runs,
+  totals,
+  daily,
+}: {
+  runs: RunRow[];
+  totals: RunTotals;
+  daily: RunDailyPoint[];
+}) {
   const router = useRouter();
   const [expanded, setExpanded] = React.useState<string | null>(null);
   const [watching, setWatching] = React.useState<RunRow | null>(null);
@@ -68,14 +96,15 @@ export function RunsView({ runs }: { runs: RunRow[] }) {
   /* live runs stay pinned above — only the history list pages */
   const pagedHistory = usePaged(history, 10, "");
 
-  const totalSpend = runs.reduce((s, r) => s + Number(r.cost_usd || 0), 0);
-  const finished = runs.filter((r) => ["completed", "failed", "cancelled"].includes(r.status));
-  const successRate = finished.length
-    ? Math.round((100 * finished.filter((r) => r.status === "completed").length) / finished.length)
-    : null;
-  const avgTurns = runs.length
-    ? Math.round((runs.reduce((s, r) => s + Number(r.turns || 0), 0) / runs.length) * 10) / 10
-    : 0;
+  const finishedCount = totals.completed + totals.failed;
+  const successRate = finishedCount > 0 ? Math.round((100 * totals.completed) / finishedCount) : null;
+
+  const trendData = daily.map((d) => ({ label: d.label, runs: d.runs, cost: d.cost }));
+  const statusMix = [
+    { name: "completed", value: totals.completed, color: "#2f9e63" },
+    { name: "failed", value: totals.failed, color: "#cf4b3b" },
+    { name: "active", value: totals.active, color: "#4f87ad" },
+  ].filter((d) => d.value > 0);
 
   const watch = (run: RunRow) => {
     setWatching(run);
@@ -86,27 +115,90 @@ export function RunsView({ runs }: { runs: RunRow[] }) {
     setWatching(null);
   };
 
+  /* the watched run's effective status — stream state wins once attached */
+  const watchedStatus = watching ? (state.status === "idle" ? watching.status : state.status) : null;
+  const watchedFinished = watchedStatus !== null && FINISHED_STATUSES.has(watchedStatus);
+
+  /** Resume a finished run's session with a follow-up prompt; the dock attaches to the new run. */
+  const sendFollowUp = async (text: string) => {
+    if (!watching) return;
+    const res = await fetch("/api/agent", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ followUpRunId: watching.id, prompt: text }),
+    });
+    if (!res.ok) {
+      toast.error("Could not start the follow-up run");
+      return;
+    }
+    const { runId, workflow } = (await res.json()) as { runId: string; workflow: string };
+    window.dispatchEvent(new CustomEvent("palate:run-started", { detail: { runId, workflow } }));
+    toast.success("Follow-up started — watch it in the dock");
+    closeWatch();
+    router.refresh();
+  };
+
   return (
     <div>
       <SectionTitle
         title="Agent runs"
         subtitle="Every run, every tool call, fully audited"
-        right={<Badge tone="neutral">{runs.length} runs</Badge>}
+        right={<Badge tone="neutral">{totals.total} runs</Badge>}
       />
 
-      {/* ───── summary strip ───── */}
+      {/* ───── analytics header ───── */}
       <div className="mt-5 grid grid-cols-2 lg:grid-cols-4 gap-4">
-        <MetricCard label="Total runs" value={runs.length} caption="across all workflows" index={0} />
-        <MetricCard label="Total spend" value={fmtUsd(totalSpend)} caption="all time" index={1} />
+        <MetricCard label="Total runs" value={totals.total} caption="across all workflows" index={0} />
         <MetricCard
           label="Success rate"
           value={successRate ?? "—"}
           suffix={successRate === null ? undefined : "%"}
           tone={successRate === null ? "neutral" : successRate >= 70 ? "good" : successRate >= 40 ? "neutral" : "bad"}
-          caption="of finished runs"
+          caption="completed vs failed"
+          index={1}
+        />
+        <MetricCard
+          label="Total spend"
+          value={`$${totals.total_cost.toFixed(3)}`}
+          caption="USD, all time"
           index={2}
         />
-        <MetricCard label="Avg turns" value={avgTurns} caption="per run" index={3} />
+        <MetricCard
+          label="Avg duration"
+          value={totals.avg_minutes ?? "—"}
+          suffix={totals.avg_minutes === null ? undefined : "min"}
+          caption="per finished run"
+          index={3}
+        />
+      </div>
+
+      <div className="mt-4 grid grid-cols-1 lg:grid-cols-3 gap-4">
+        <Card className="p-4 sm:p-5 lg:col-span-2 animate-in-up">
+          <p className="text-[11px] uppercase tracking-[0.18em] text-cream-faint mb-2">
+            Runs &amp; spend — last 14 days
+          </p>
+          <TrendArea
+            data={trendData}
+            series={[
+              { key: "runs", name: "Runs", color: "#3f9268" },
+              { key: "cost", name: "Cost (USD)", color: "#bc5a32" },
+            ]}
+            stacked={false}
+            height={200}
+          />
+        </Card>
+        <Card className="p-4 sm:p-5 animate-in-up">
+          <p className="text-[11px] uppercase tracking-[0.18em] text-cream-faint mb-2">Status mix</p>
+          {statusMix.length > 0 ? (
+            <Donut
+              data={statusMix}
+              height={200}
+              centerLabel={{ value: String(totals.total), caption: "total runs" }}
+            />
+          ) : (
+            <p className="text-xs text-cream-faint py-10 text-center">No runs recorded yet.</p>
+          )}
+        </Card>
       </div>
 
       {/* ───── live runs ───── */}
@@ -131,6 +223,7 @@ export function RunsView({ runs }: { runs: RunRow[] }) {
                 <div className="flex items-center gap-3 flex-wrap">
                   <Badge tone={WORKFLOW_TONE[r.workflow] ?? "neutral"}>{r.workflow}</Badge>
                   <StatusBadge status={r.status} />
+                  <TriggerBadge trigger={r.trigger} />
                   <p className="text-sm text-cream-muted line-clamp-1 flex-1 min-w-[200px]">
                     {r.summary ?? r.prompt ?? "Agent working…"}
                   </p>
@@ -163,7 +256,7 @@ export function RunsView({ runs }: { runs: RunRow[] }) {
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: Math.min(i, 10) * 0.05 }}
             >
-              <RunCard run={r} expanded={expanded === r.id} onToggle={() => setExpanded(expanded === r.id ? null : r.id)} />
+              <RunCard run={r} expanded={expanded === r.id} onToggle={() => setExpanded(expanded === r.id ? null : r.id)} onContinue={() => watch(r)} />
             </motion.div>
           ))
         )}
@@ -186,7 +279,12 @@ export function RunsView({ runs }: { runs: RunRow[] }) {
               <span className="font-mono text-[10px] text-cream-faint truncate">{watching.id}</span>
               <span className="ml-auto text-[11px] text-cream-faint shrink-0">started {timeAgo(watching.started_at)}</span>
             </div>
-            <RunConsole state={state} onDecide={decide} className="flex-1" />
+            <RunConsole
+              state={state}
+              onDecide={decide}
+              className="flex-1"
+              onFollowUp={watchedFinished ? sendFollowUp : undefined}
+            />
           </div>
         )}
       </Modal>
@@ -194,10 +292,21 @@ export function RunsView({ runs }: { runs: RunRow[] }) {
   );
 }
 
+/* ───── tiny trigger chip (manual / chat / cron / pipeline) ───── */
+
+function TriggerBadge({ trigger }: { trigger: string }) {
+  return (
+    <Badge tone="neutral" className="px-1.5 py-0 text-[10px] font-mono lowercase">
+      {trigger}
+    </Badge>
+  );
+}
+
 /* ───── single historical run card ───── */
 
-function RunCard({ run, expanded, onToggle }: { run: RunRow; expanded: boolean; onToggle: () => void }) {
+function RunCard({ run, expanded, onToggle, onContinue }: { run: RunRow; expanded: boolean; onToggle: () => void; onContinue: () => void }) {
   const dur = fmtDuration(run.started_at, run.finished_at);
+  const isFinished = FINISHED_STATUSES.has(run.status);
   return (
     <HoverDetail
       side="left"
@@ -223,12 +332,25 @@ function RunCard({ run, expanded, onToggle }: { run: RunRow; expanded: boolean; 
         </div>
       }
     >
-    <Card hover className="overflow-hidden">
-      <button onClick={onToggle} className="w-full text-left p-4 sm:p-5">
+    <Card hover className="overflow-hidden group">
+      {/* div+role (not <button>) so the AskPalate chip inside isn't a nested button */}
+      <div
+        role="button"
+        tabIndex={0}
+        onClick={onToggle}
+        onKeyDown={(e) => {
+          if (e.key === "Enter" || e.key === " ") {
+            e.preventDefault();
+            onToggle();
+          }
+        }}
+        className="w-full text-left p-4 sm:p-5 cursor-pointer"
+      >
         <div className="flex items-start gap-3">
           <div className="flex items-center gap-2 shrink-0 flex-wrap">
             <Badge tone={WORKFLOW_TONE[run.workflow] ?? "neutral"}>{run.workflow}</Badge>
             <StatusBadge status={run.status} />
+            <TriggerBadge trigger={run.trigger} />
           </div>
           <p className="text-sm text-cream-muted leading-relaxed line-clamp-2 flex-1 min-w-[180px]">
             {run.summary ?? run.prompt ?? "No summary recorded"}
@@ -248,9 +370,25 @@ function RunCard({ run, expanded, onToggle }: { run: RunRow; expanded: boolean; 
               <Timer className="h-3 w-3" /> {dur}
             </span>
           )}
+          {isFinished && (
+            <button
+              onClick={(e) => { e.stopPropagation(); onContinue(); }}
+              title="Replay this run and ask a follow-up — same session, full context"
+              className="inline-flex items-center gap-1 rounded-full border border-[rgba(196,99,58,0.35)] bg-[rgba(196,99,58,0.07)] px-2 py-0.5 text-[10px] text-terracotta hover:bg-[rgba(196,99,58,0.14)] transition-colors opacity-0 group-hover:opacity-100 focus-visible:opacity-100"
+            >
+              <MessageSquarePlus className="h-2.5 w-2.5" />
+              Continue
+            </button>
+          )}
+          {isFinished && (
+            <AskPalateButton
+              prompt={`Look at agent run ${run.id} (${run.workflow}, ${run.status}). Summarise what it did and whether anything needs my attention.`}
+              className="opacity-0 group-hover:opacity-100 transition-opacity"
+            />
+          )}
           <span className="ml-auto">{timeAgo(run.started_at)}</span>
         </div>
-      </button>
+      </div>
 
       <AnimatePresence initial={false}>
         {expanded && (

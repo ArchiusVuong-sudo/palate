@@ -10,10 +10,10 @@ import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 import { motion } from "framer-motion";
 import { toast } from "sonner";
-import { BookOpen, Eye, EyeOff, FileText, Folder, Plus, Sparkles, Trash2 } from "lucide-react";
+import { BookOpen, Eye, EyeOff, FileText, Folder, History, Plus, RotateCcw, Sparkles, Trash2 } from "lucide-react";
 import type { KnowledgeFile } from "@/lib/queries";
 import {
-  Badge, Button, Card, EmptyState, Input, Modal, SectionTitle, Textarea,
+  Badge, Button, Card, EmptyState, Input, Modal, SectionTitle, Textarea, WorkingDots,
 } from "@/components/ui/primitives";
 import { cn, timeAgo } from "@/lib/format";
 
@@ -21,6 +21,52 @@ const PATH_RE = /^[a-z0-9-_/.]+\.md$/i;
 const KNOWN_FOLDERS = ["brand", "audience", "operations", "learnings"];
 
 const basename = (path: string) => path.split("/").pop() ?? path;
+
+/* ───────── memory evolution: revision types + tiny line diff ───────── */
+
+type Revision = {
+  version: number;
+  content: string;
+  updated_by: string;
+  change_note: string | null;
+  created_at: string;
+};
+
+type DiffLine = { type: "add" | "del" | "ctx"; text: string };
+
+const DIFF_LINE_CAP = 400;
+
+/** Simple LCS line diff: old = the past revision, new = the current content. */
+function diffLines(oldText: string, newText: string): DiffLine[] {
+  const a = oldText.split("\n").slice(0, DIFF_LINE_CAP);
+  const b = newText.split("\n").slice(0, DIFF_LINE_CAP);
+  const n = a.length;
+  const m = b.length;
+  const dp: number[][] = Array.from({ length: n + 1 }, () => new Array<number>(m + 1).fill(0));
+  for (let i = n - 1; i >= 0; i--) {
+    for (let j = m - 1; j >= 0; j--) {
+      dp[i][j] = a[i] === b[j] ? dp[i + 1][j + 1] + 1 : Math.max(dp[i + 1][j], dp[i][j + 1]);
+    }
+  }
+  const out: DiffLine[] = [];
+  let i = 0;
+  let j = 0;
+  while (i < n && j < m) {
+    if (a[i] === b[j]) {
+      out.push({ type: "ctx", text: a[i] });
+      i++; j++;
+    } else if (dp[i + 1][j] >= dp[i][j + 1]) {
+      out.push({ type: "del", text: a[i] });
+      i++;
+    } else {
+      out.push({ type: "add", text: b[j] });
+      j++;
+    }
+  }
+  while (i < n) out.push({ type: "del", text: a[i++] });
+  while (j < m) out.push({ type: "add", text: b[j++] });
+  return out;
+}
 
 function groupFiles(files: KnowledgeFile[]): [string, KnowledgeFile[]][] {
   const groups = new Map<string, KnowledgeFile[]>();
@@ -53,14 +99,69 @@ export function KnowledgeView({ files }: { files: KnowledgeFile[] }) {
   const [newContent, setNewContent] = React.useState("");
   const [creating, setCreating] = React.useState(false);
 
+  // Memory evolution — revision history state.
+  const [historyOpen, setHistoryOpen] = React.useState(false);
+  const [revisions, setRevisions] = React.useState<Revision[] | null>(null);
+  const [loadingRevs, setLoadingRevs] = React.useState(false);
+  const [viewedVersion, setViewedVersion] = React.useState<number | null>(null);
+  const [restoring, setRestoring] = React.useState(false);
+
   // Re-sync the editor whenever a different file (or a fresh version of it) arrives.
   const selectedId = selected?.id;
   const selectedVersion = selected?.version;
   React.useEffect(() => {
     setDraft(selected?.content ?? "");
     setChangeNote("");
+    setHistoryOpen(false);
+    setRevisions(null);
+    setViewedVersion(null);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [selectedId, selectedVersion]);
+
+  const toggleHistory = async () => {
+    if (historyOpen) {
+      setHistoryOpen(false);
+      return;
+    }
+    if (!selected) return;
+    setHistoryOpen(true);
+    setViewedVersion(null);
+    setLoadingRevs(true);
+    try {
+      const res = await fetch(`/api/knowledge/revisions?fileId=${encodeURIComponent(selected.id)}`);
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+      const data = (await res.json()) as { revisions: Revision[] };
+      setRevisions(data.revisions ?? []);
+    } catch {
+      toast.error("Couldn't load the file's history");
+      setRevisions([]);
+    } finally {
+      setLoadingRevs(false);
+    }
+  };
+
+  const restore = async (rev: Revision) => {
+    if (!selected) return;
+    setRestoring(true);
+    try {
+      const res = await fetch("/api/knowledge", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ path: selected.path, content: rev.content, change_note: `restored v${rev.version}` }),
+      });
+      if (!res.ok) {
+        const err = await res.json().catch(() => ({}));
+        throw new Error(typeof err.error === "string" ? err.error : `HTTP ${res.status}`);
+      }
+      const data = (await res.json()) as { version?: number };
+      toast.success(`Restored v${rev.version}${data.version ? ` — now v${data.version}` : ""}`);
+      router.refresh();
+    } catch (e) {
+      toast.error(e instanceof Error ? e.message : "Couldn't restore the version");
+    } finally {
+      setRestoring(false);
+    }
+  };
 
   const groups = React.useMemo(() => groupFiles(files), [files]);
   const dirty = selected ? draft !== selected.content : false;
@@ -234,7 +335,17 @@ export function KnowledgeView({ files }: { files: KnowledgeFile[] }) {
                 </div>
 
                 <div className="p-4">
-                  {preview ? (
+                  {historyOpen ? (
+                    <HistoryPanel
+                      file={selected}
+                      revisions={revisions}
+                      loading={loadingRevs}
+                      viewedVersion={viewedVersion}
+                      onView={(v) => setViewedVersion((cur) => (cur === v ? null : v))}
+                      onRestore={restore}
+                      restoring={restoring}
+                    />
+                  ) : preview ? (
                     <div className="prose-palate min-h-[420px] max-h-[62vh] overflow-y-auto rounded-xl border border-line bg-[rgba(43,34,26,0.04)] px-4 py-3">
                       <ReactMarkdown remarkPlugins={[remarkGfm]}>{draft || "*Nothing here yet.*"}</ReactMarkdown>
                     </div>
@@ -248,10 +359,32 @@ export function KnowledgeView({ files }: { files: KnowledgeFile[] }) {
                     />
                   )}
                   <div className="mt-2 flex items-center justify-between">
-                    <Button variant="ghost" size="sm" onClick={() => setPreview((p) => !p)}>
-                      {preview ? <EyeOff className="h-3.5 w-3.5" /> : <Eye className="h-3.5 w-3.5" />}
-                      {preview ? "Edit markdown" : "Preview"}
-                    </Button>
+                    <div className="flex items-center gap-1">
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => {
+                          if (historyOpen) {
+                            setHistoryOpen(false);
+                            setPreview(true);
+                          } else {
+                            setPreview((p) => !p);
+                          }
+                        }}
+                      >
+                        {preview && !historyOpen ? <EyeOff className="h-3.5 w-3.5" /> : <Eye className="h-3.5 w-3.5" />}
+                        {preview && !historyOpen ? "Edit markdown" : "Preview"}
+                      </Button>
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={toggleHistory}
+                        className={historyOpen ? "text-amber" : undefined}
+                      >
+                        <History className="h-3.5 w-3.5" />
+                        {historyOpen ? "Close history" : `History v${selected.version}`}
+                      </Button>
+                    </div>
                     {dirty && (
                       <span className="flex items-center gap-1.5 text-[10px] text-amber">
                         <span className="dot bg-amber" style={{ width: 6, height: 6 }} /> unsaved changes
@@ -386,5 +519,185 @@ function FileRow({
         {file.updated_by}
       </Badge>
     </motion.button>
+  );
+}
+
+/* ───────── memory evolution: history timeline + diff ───────── */
+
+function VersionChip({ version, current }: { version: number; current?: boolean }) {
+  return (
+    <span
+      className={cn(
+        "shrink-0 rounded-md border px-1.5 py-0.5 font-mono text-[10px]",
+        current
+          ? "border-[rgba(201,127,61,0.35)] bg-[rgba(201,127,61,0.10)] text-amber"
+          : "border-line text-cream-muted"
+      )}
+    >
+      v{version}
+    </span>
+  );
+}
+
+function HistoryPanel({
+  file, revisions, loading, viewedVersion, onView, onRestore, restoring,
+}: {
+  file: KnowledgeFile;
+  revisions: Revision[] | null;
+  loading: boolean;
+  viewedVersion: number | null;
+  onView: (version: number) => void;
+  onRestore: (rev: Revision) => void;
+  restoring: boolean;
+}) {
+  const past = React.useMemo(
+    () => (revisions ?? []).filter((r) => r.version !== file.version),
+    [revisions, file.version]
+  );
+
+  if (loading) {
+    return (
+      <div className="flex min-h-[420px] items-center justify-center rounded-xl border border-line bg-[rgba(43,34,26,0.03)]">
+        <WorkingDots label="Reading the agent's memory…" />
+      </div>
+    );
+  }
+
+  return (
+    <div className="min-h-[420px] max-h-[62vh] overflow-y-auto rounded-xl border border-line bg-[rgba(43,34,26,0.02)] p-3 animate-in-up">
+      <div className="relative pl-5">
+        {/* timeline rail */}
+        <span
+          aria-hidden
+          className="absolute left-[5px] top-2 bottom-2 w-px"
+          style={{ backgroundColor: "rgba(43,34,26,0.12)" }}
+        />
+
+        {/* current version, pinned */}
+        <div className="relative">
+          <span
+            aria-hidden
+            className="absolute -left-[18px] top-[13px] h-2 w-2 rounded-full bg-amber"
+            style={{ boxShadow: "0 0 8px 1px rgba(201,127,61,0.5)" }}
+          />
+          <div className="flex items-center gap-2 rounded-xl border border-[rgba(201,127,61,0.25)] bg-[rgba(201,127,61,0.06)] px-2.5 py-2">
+            <VersionChip version={file.version} current />
+            <span className="text-[10px] uppercase tracking-[0.14em] text-amber shrink-0">current</span>
+            <Badge tone={file.updated_by === "agent" ? "agent" : "neutral"} className="px-1.5 py-0 text-[9px] shrink-0">
+              {file.updated_by === "agent" && <Sparkles className="h-2.5 w-2.5" />}
+              {file.updated_by}
+            </Badge>
+            {file.change_note && (
+              <span className="min-w-0 flex-1 truncate text-[11px] italic text-cream-muted" title={file.change_note}>
+                “{file.change_note}”
+              </span>
+            )}
+            <span className="ml-auto shrink-0 text-[10px] text-cream-faint">{timeAgo(file.updated_at)}</span>
+          </div>
+        </div>
+
+        {/* past revisions */}
+        {past.length === 0 ? (
+          <p className="px-2.5 py-4 text-[11px] italic text-cream-faint">
+            No earlier revisions recorded yet — history starts with the next save.
+          </p>
+        ) : (
+          <div className="mt-1.5 grid grid-cols-1 gap-1.5">
+            {past.map((rev) => {
+              const agent = rev.updated_by === "agent";
+              const open = viewedVersion === rev.version;
+              return (
+                <div key={rev.version} className="relative">
+                  <span
+                    aria-hidden
+                    className={cn("absolute -left-[17px] top-[14px] h-1.5 w-1.5 rounded-full", agent ? "bg-eucalyptus" : "")}
+                    style={agent ? undefined : { backgroundColor: "rgba(43,34,26,0.25)" }}
+                  />
+                  <button
+                    onClick={() => onView(rev.version)}
+                    className={cn(
+                      "flex w-full items-center gap-2 rounded-xl border px-2.5 py-2 text-left transition-all",
+                      open
+                        ? "border-[rgba(196,99,58,0.25)] bg-[rgba(196,99,58,0.08)]"
+                        : "border-transparent hover:border-line hover:bg-[rgba(43,34,26,0.04)]"
+                    )}
+                  >
+                    <VersionChip version={rev.version} />
+                    <Badge tone={agent ? "agent" : "neutral"} className="px-1.5 py-0 text-[9px] shrink-0">
+                      {agent && <Sparkles className="h-2.5 w-2.5" />}
+                      {rev.updated_by}
+                    </Badge>
+                    {rev.change_note && (
+                      <span className="min-w-0 flex-1 truncate text-[11px] italic text-cream-muted" title={rev.change_note}>
+                        “{rev.change_note}”
+                      </span>
+                    )}
+                    <span className="ml-auto shrink-0 text-[10px] text-cream-faint">{timeAgo(rev.created_at)}</span>
+                  </button>
+                  {open && (
+                    <RevisionDiff rev={rev} file={file} onRestore={onRestore} restoring={restoring} />
+                  )}
+                </div>
+              );
+            })}
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}
+
+function RevisionDiff({
+  rev, file, onRestore, restoring,
+}: {
+  rev: Revision;
+  file: KnowledgeFile;
+  onRestore: (rev: Revision) => void;
+  restoring: boolean;
+}) {
+  const full = React.useMemo(() => diffLines(rev.content, file.content), [rev.content, file.content]);
+  const lines = full.slice(0, DIFF_LINE_CAP);
+  const truncated = full.length > DIFF_LINE_CAP;
+  const adds = full.filter((l) => l.type === "add").length;
+  const dels = full.filter((l) => l.type === "del").length;
+
+  return (
+    <div className="mt-1.5 overflow-hidden rounded-xl border border-line animate-in-up">
+      <div className="flex flex-wrap items-center gap-2 border-b border-line bg-[rgba(43,34,26,0.03)] px-3 py-2">
+        <p className="font-mono text-[10px] text-cream-muted">
+          v{rev.version} → v{file.version} <span className="text-cream-faint">(current)</span>
+        </p>
+        <span className="font-mono text-[10px] text-good">+{adds}</span>
+        <span className="font-mono text-[10px] text-bad">−{dels}</span>
+        <Button
+          size="sm"
+          variant="outline"
+          loading={restoring}
+          onClick={() => onRestore(rev)}
+          className="ml-auto h-7 text-[11px]"
+        >
+          <RotateCcw className="h-3 w-3" /> Restore this version
+        </Button>
+      </div>
+      <div className="max-h-[42vh] overflow-y-auto py-1 font-mono text-[11px] leading-relaxed">
+        {lines.map((l, i) => (
+          <div
+            key={i}
+            className={cn(
+              "flex gap-2 whitespace-pre-wrap break-words px-3",
+              l.type === "del" && "bg-[rgba(207,75,59,0.08)] text-bad",
+              l.type === "add" && "bg-[rgba(47,158,99,0.08)] text-good",
+              l.type === "ctx" && "text-cream-faint"
+            )}
+          >
+            <span className="w-3 shrink-0 select-none">{l.type === "del" ? "−" : l.type === "add" ? "+" : " "}</span>
+            <span className="min-w-0 flex-1">{l.text || " "}</span>
+          </div>
+        ))}
+        {truncated && (
+          <p className="px-3 py-1.5 text-[10px] italic text-cream-faint">… diff truncated at {DIFF_LINE_CAP} lines</p>
+        )}
+      </div>
+    </div>
   );
 }

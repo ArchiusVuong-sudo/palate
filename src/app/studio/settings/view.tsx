@@ -9,14 +9,16 @@ import { useRouter } from "next/navigation";
 import { motion } from "framer-motion";
 import { toast } from "sonner";
 import {
-  AtSign, Bot, Film, Globe, Image as ImageIcon, KeyRound, Mail,
-  MessageSquare, ShieldCheck, Star, UtensilsCrossed, Wallet,
+  AtSign, Bot, CalendarClock, Film, Globe, Image as ImageIcon, KeyRound, Mail,
+  MessageSquare, ShieldCheck, Star, UtensilsCrossed, Wallet, Zap,
 } from "lucide-react";
 import { Badge, Button, Card, Input, SectionTitle } from "@/components/ui/primitives";
 import type { Brand } from "@/lib/brand";
-import { SOURCE_LABELS, timeAgo } from "@/lib/format";
+import { cn, fmtDate, SOURCE_LABELS, timeAgo } from "@/lib/format";
 
 const display = { fontFamily: "var(--font-display), serif" };
+
+export type AutopilotSettings = { enabled: boolean; hour: number };
 
 export type ConnectionRow = {
   provider: string;
@@ -63,7 +65,13 @@ function ConnectionBadge({ status }: { status: string }) {
   return <Badge tone="neutral">disconnected</Badge>;
 }
 
-export function SettingsView({ brand, connections }: { brand: Brand; connections: ConnectionRow[] }) {
+export function SettingsView({
+  brand, connections, autopilot,
+}: {
+  brand: Brand;
+  connections: ConnectionRow[];
+  autopilot: AutopilotSettings;
+}) {
   const router = useRouter();
   const byProvider = new Map(connections.map((c) => [c.provider, c]));
   const list: ConnectionRow[] = PROVIDER_ORDER.map(
@@ -78,6 +86,12 @@ export function SettingsView({ brand, connections }: { brand: Brand; connections
         {/* ───── brand card ───── */}
         <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }}>
           <BrandCard brand={brand} />
+        </motion.div>
+
+        {/* ───── autopilot ───── */}
+        <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.04 }}>
+          <p className="text-[11px] uppercase tracking-[0.18em] text-cream-faint mb-3 mt-2">Automation</p>
+          <AutopilotCard initial={autopilot} />
         </motion.div>
 
         {/* ───── connections ───── */}
@@ -97,6 +111,107 @@ export function SettingsView({ brand, connections }: { brand: Brand; connections
         </motion.div>
       </div>
     </div>
+  );
+}
+
+/* ───────── autopilot ───────── */
+
+const AUTOPILOT_HOURS = [6, 7, 8, 9, 10];
+const hourLabel = (h: number) => `${h}:00 am`;
+
+function AutopilotCard({ initial }: { initial: AutopilotSettings }) {
+  const [settings, setSettings] = React.useState<AutopilotSettings>(initial);
+  // Computed post-mount so the SSR HTML never disagrees with the client clock.
+  const [tomorrow, setTomorrow] = React.useState("");
+  React.useEffect(() => {
+    setTomorrow(fmtDate(new Date(Date.now() + 86_400_000), { weekday: "short" }));
+  }, []);
+
+  const save = async (next: AutopilotSettings) => {
+    const prev = settings;
+    setSettings(next); // optimistic
+    try {
+      const res = await fetch("/api/settings", {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ autopilot: next }),
+      });
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+      toast.success(
+        next.enabled
+          ? `Autopilot on — daily pipeline runs at ${hourLabel(next.hour)} AEST`
+          : "Autopilot off — pipelines only run when you start them"
+      );
+    } catch {
+      setSettings(prev);
+      toast.error("Couldn't save autopilot — try again");
+    }
+  };
+
+  return (
+    <Card className="p-5">
+      <div className="flex items-center gap-3 flex-wrap">
+        <span className="inline-flex h-10 w-10 items-center justify-center rounded-2xl border border-[rgba(201,127,61,0.3)] bg-[rgba(201,127,61,0.12)] shrink-0">
+          <Zap className="h-4.5 w-4.5 text-amber" />
+        </span>
+        <div className="min-w-0 flex-1">
+          <h3 className="text-base text-cream" style={display}>Autopilot</h3>
+          <p className="text-xs text-cream-muted">Run the full daily pipeline automatically</p>
+        </div>
+
+        {settings.enabled && (
+          <select
+            value={settings.hour}
+            onChange={(e) => void save({ ...settings, hour: Number(e.target.value) })}
+            aria-label="Autopilot run hour"
+            className="h-8 rounded-lg border border-line bg-transparent px-2 text-xs text-cream focus:outline-none focus:border-line-strong cursor-pointer"
+          >
+            {AUTOPILOT_HOURS.map((h) => (
+              <option key={h} value={h}>{hourLabel(h)} AEST</option>
+            ))}
+          </select>
+        )}
+
+        <button
+          type="button"
+          role="switch"
+          aria-checked={settings.enabled}
+          aria-label="Toggle autopilot"
+          onClick={() => void save({ ...settings, enabled: !settings.enabled })}
+          className={cn(
+            "relative h-6 w-11 shrink-0 rounded-full border transition-colors duration-200",
+            settings.enabled
+              ? "border-[rgba(63,146,104,0.6)] bg-[rgba(63,146,104,0.85)]"
+              : "border-line-strong bg-[rgba(43,34,26,0.12)]"
+          )}
+        >
+          <span
+            className={cn(
+              "absolute left-0.5 top-0.5 h-[18px] w-[18px] rounded-full bg-white shadow-sm transition-transform duration-200",
+              settings.enabled && "translate-x-5"
+            )}
+          />
+        </button>
+      </div>
+
+      <div className="mt-4 pt-3.5 border-t border-line flex items-center gap-2.5 flex-wrap">
+        {settings.enabled ? (
+          <>
+            <span className="inline-flex items-center gap-1.5 rounded-full border border-[rgba(63,146,104,0.3)] bg-[rgba(63,146,104,0.08)] px-3 py-1 text-[11px] text-eucalyptus">
+              <CalendarClock className="h-3 w-3" />
+              next run tomorrow{tomorrow ? ` (${tomorrow})` : ""} · {hourLabel(settings.hour)} AEST
+            </span>
+            <p className="text-[10.5px] text-cream-faint leading-relaxed">
+              listening → briefing → creative → review — human approvals still gate every send.
+            </p>
+          </>
+        ) : (
+          <p className="text-[10.5px] text-cream-faint leading-relaxed">
+            Autopilot is off — the morning cron skips, and pipelines only run when you press the button.
+          </p>
+        )}
+      </div>
+    </Card>
   );
 }
 

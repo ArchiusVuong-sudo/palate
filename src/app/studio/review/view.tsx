@@ -20,6 +20,8 @@ import {
   Badge, Button, Card, EmptyState, Input, Modal, SectionTitle, WorkingDots,
 } from "@/components/ui/primitives";
 import { HoverDetail } from "@/components/ui/hover-detail";
+import { fireConfetti } from "@/components/ui/confetti";
+import { AskPalateButton } from "@/components/agent/ask-palate";
 import { ShowMoreButton } from "@/components/ui/lazy-list";
 import { usePaged } from "@/components/ui/use-paged";
 import { InstagramFrame } from "@/components/social/instagram-frame";
@@ -176,7 +178,13 @@ export function ReviewView({
     }
   };
 
-  const updatePost = async (postId: string, patch: Record<string, unknown>, success: string, key: string) => {
+  const updatePost = async (
+    postId: string,
+    patch: Record<string, unknown>,
+    success: string,
+    key: string,
+    celebrateAt?: { x: number; y: number }
+  ) => {
     setActing(key);
     try {
       const res = await fetch(`/api/posts/${postId}`, {
@@ -189,6 +197,7 @@ export function ReviewView({
         throw new Error(typeof err.error === "string" ? err.error : `HTTP ${res.status}`);
       }
       toast.success(success);
+      if (celebrateAt) fireConfetti(celebrateAt.x, celebrateAt.y);
       router.refresh();
     } catch (e) {
       toast.error(e instanceof Error ? e.message : "Couldn't update the post");
@@ -207,6 +216,7 @@ export function ReviewView({
     e.preventDefault();
     setHoverCol(null);
     setDraggingId(null);
+    const dropAt = { x: e.clientX, y: e.clientY };
     const id = e.dataTransfer.getData("text/plain");
     const col = COLUMNS.find((c) => c.key === colKey);
     const post = clientPosts.find((p) => p.id === id);
@@ -234,6 +244,7 @@ export function ReviewView({
         throw new Error(typeof err.error === "string" ? err.error : `HTTP ${res.status}`);
       }
       toast.success(`Moved to ${col.label}`);
+      if (colKey === "approved" || colKey === "shipped") fireConfetti(dropAt.x, dropAt.y);
       router.refresh();
     } catch (err) {
       setClientPosts(previous);
@@ -642,15 +653,22 @@ function PostCard({
   review?: Review;
   index: number;
   actingKey: string | null;
-  onAction: (postId: string, patch: Record<string, unknown>, success: string, key: string) => void;
+  onAction: (
+    postId: string,
+    patch: Record<string, unknown>,
+    success: string,
+    key: string,
+    celebrateAt?: { x: number; y: number }
+  ) => void;
   dragging: boolean;
   onDragStart: () => void;
   onDragEnd: () => void;
   onPreview: () => void;
 }) {
-  const act = (action: string, patch: Record<string, unknown>, success: string) =>
-    onAction(post.id, patch, success, `${post.id}:${action}`);
+  const act = (action: string, patch: Record<string, unknown>, success: string, celebrateAt?: { x: number; y: number }) =>
+    onAction(post.id, patch, success, `${post.id}:${action}`, celebrateAt);
   const busyOn = (action: string) => actingKey === `${post.id}:${action}`;
+  const askPrompt = `Review post ${post.id} (${post.channel}): "${post.caption ?? ""}". Should we ship it as-is? Check it against our brand voice rules.`;
 
   return (
     // Plain div (not motion.div): native HTML5 onDragStart/onDragEnd clash with framer-motion's drag props.
@@ -663,7 +681,7 @@ function PostCard({
       }}
       onDragEnd={onDragEnd}
       className={cn(
-        "glass glass-hover rounded-2xl p-3.5 flex flex-col gap-2.5 animate-in-up cursor-grab active:cursor-grabbing min-w-0 max-w-full overflow-hidden",
+        "group glass glass-hover rounded-2xl p-3.5 flex flex-col gap-2.5 animate-in-up cursor-grab active:cursor-grabbing min-w-0 max-w-full overflow-hidden",
         dragging && "opacity-50 ring-2 ring-[rgba(196,99,58,0.5)]"
       )}
       style={{ animationDelay: `${Math.min(index, 8) * 0.06}s` }}
@@ -706,7 +724,13 @@ function PostCard({
       <div className="flex flex-wrap items-center gap-1.5">
         {(post.status === "draft" || post.status === "in_review") && (
           <>
-            <Button size="sm" loading={busyOn("approve")} onClick={() => act("approve", { status: "approved" }, "Post approved — ready to schedule")}>
+            <Button
+              size="sm"
+              loading={busyOn("approve")}
+              onClick={(e) =>
+                act("approve", { status: "approved" }, "Post approved — ready to schedule", { x: e.clientX, y: e.clientY })
+              }
+            >
               <CheckCircle2 className="h-3.5 w-3.5" /> Approve
             </Button>
             <Button size="sm" variant="outline" loading={busyOn("changes")} onClick={() => act("changes", { status: "changes_requested" }, "Changes requested on the post")}>
@@ -739,10 +763,14 @@ function PostCard({
             <Send className="h-3.5 w-3.5" /> Mark published
           </Button>
         )}
+        <AskPalateButton
+          prompt={askPrompt}
+          className="ml-auto opacity-0 group-hover:opacity-100 focus-visible:opacity-100 transition-opacity"
+        />
         <Button
           size="sm"
           variant="ghost"
-          className="ml-auto px-2"
+          className="px-2"
           title="Instagram preview"
           aria-label="Instagram preview"
           onClick={onPreview}

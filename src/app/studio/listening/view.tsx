@@ -15,13 +15,29 @@ import { HoverDetail, HoverQuote, HoverRow } from "@/components/ui/hover-detail"
 import { LazySentinel, ShowMoreButton } from "@/components/ui/lazy-list";
 import { usePaged } from "@/components/ui/use-paged";
 import { MetricCard, TrendArea } from "@/components/charts/charts";
+import { ActivityHeatmap, RadarCompare, type HeatmapDay } from "@/components/charts/extra";
 import { BlockRenderer } from "@/components/blocks/block-renderer";
 import { RunConsole } from "@/components/agent/run-console";
 import { useRunStream } from "@/components/agent/use-run-stream";
+import { AskPalateButton } from "@/components/agent/ask-palate";
 import { cn, fmtDateTime, initials, SOURCE_LABELS, timeAgo } from "@/lib/format";
 import type { CanvasBlockRow, Insight, SocialItem } from "@/lib/queries";
 
 type TrendRow = { day: string; positive: number; negative: number; neutral: number };
+
+/** Shape of a getLocationPulse(14) row (typed locally — page rules forbid touching lib/queries). */
+type LocationPulse = {
+  name: string;
+  mentions: number;
+  avg_sentiment: number | null;
+  positive: number;
+  negative: number;
+  avg_rating: number | null;
+  top_dish: string | null;
+};
+
+/** Venue colours: terracotta, eucalyptus, info — one per location, in order. */
+const LOC_COLORS = ["#bc5a32", "#3f9268", "#4f87ad"];
 
 const SOURCE_ICONS: Record<string, React.ComponentType<{ className?: string }>> = {
   google_reviews: Star,
@@ -83,12 +99,14 @@ function matchesDayLabel(postedAt: string, label: string): boolean {
 }
 
 export function ListeningView({
-  items, insights, blocks, trend,
+  items, insights, blocks, trend, heatmap, pulse,
 }: {
   items: SocialItem[];
   insights: Insight[];
   blocks: CanvasBlockRow[];
   trend: TrendRow[];
+  heatmap: HeatmapDay[];
+  pulse: LocationPulse[];
 }) {
   const router = useRouter();
   const { state, start, decide, busy, reset } = useRunStream({ onDone: () => router.refresh() });
@@ -217,6 +235,10 @@ export function ListeningView({
           />
         </div>
 
+        {/* ── 2b · listening rhythm + venue radar ── */}
+        {heatmap.length > 0 && <RhythmCard heatmap={heatmap} />}
+        {pulse.length > 0 && <VenuesCard pulse={pulse} />}
+
         {/* ── 3 · feed + insights ── */}
         <div className="grid grid-cols-1 gap-5 lg:grid-cols-3 items-start">
           {/* the feed */}
@@ -343,6 +365,129 @@ export function ListeningView({
 
 /* ───────────────────────── local pieces ───────────────────────── */
 
+function StatChip({ children }: { children: React.ReactNode }) {
+  return (
+    <span className="rounded-full border border-line bg-[rgba(43,34,26,0.03)] px-2 py-0.5 font-mono text-[10px] text-cream-muted whitespace-nowrap">
+      {children}
+    </span>
+  );
+}
+
+/** "Listening rhythm" — 84-day GitHub-style heatmap of mention volume + mood. */
+function RhythmCard({ heatmap }: { heatmap: HeatmapDay[] }) {
+  const total = heatmap.reduce((acc, d) => acc + d.count, 0);
+  const activeDays = heatmap.filter((d) => d.count > 0).length;
+  const busiest = heatmap.reduce<HeatmapDay | null>(
+    (acc, d) => (d.count > 0 && (acc === null || d.count > acc.count) ? d : acc),
+    null
+  );
+  // static month table — Node and browser locale data disagree on short month names, breaking hydration
+  const MONTHS = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+  const busiestLabel = busiest
+    ? `${Number(busiest.day.slice(8, 10))} ${MONTHS[Number(busiest.day.slice(5, 7)) - 1]}`
+    : null;
+
+  return (
+    <Card className="p-4 animate-in-up">
+      <div className="flex items-start justify-between gap-3 flex-wrap">
+        <div>
+          <h3 className="text-lg text-cream" style={{ fontFamily: "var(--font-display), serif" }}>
+            Listening rhythm
+          </h3>
+          <p className="text-[11px] text-cream-muted mt-0.5">
+            Twelve weeks of mentions — depth is volume, colour is mood. Hover a day for detail.
+          </p>
+        </div>
+        <div className="flex items-center gap-1.5 flex-wrap">
+          <StatChip>{total} mentions</StatChip>
+          {busiest && busiestLabel && (
+            <StatChip>
+              busiest {busiestLabel} · {busiest.count}
+            </StatChip>
+          )}
+          <StatChip>
+            {activeDays}/{heatmap.length} days active
+          </StatChip>
+        </div>
+      </div>
+      <div className="mt-3">
+        <ActivityHeatmap data={heatmap} />
+      </div>
+    </Card>
+  );
+}
+
+/** "Across the venues" — radar comparing the locations, plus a compact row each. */
+function VenuesCard({ pulse }: { pulse: LocationPulse[] }) {
+  const series = pulse.map((p, i) => ({ key: `l${i}`, name: p.name, color: LOC_COLORS[i % LOC_COLORS.length] }));
+  // normalise each axis to the leading venue (=100) so counts and ratings share one scale
+  const row = (metric: string, pick: (p: LocationPulse) => number): Record<string, string | number> => {
+    const values = pulse.map(pick);
+    const max = Math.max(1, ...values);
+    return {
+      metric,
+      ...Object.fromEntries(values.map((v, i) => [`l${i}`, Math.round((v / max) * 100)])),
+    };
+  };
+  const radarData = [
+    row("Mentions", (p) => p.mentions),
+    row("Positive", (p) => p.positive),
+    row("Negative", (p) => p.negative),
+    row("Rating", (p) => (p.avg_rating === null ? 0 : Number(p.avg_rating))),
+  ];
+
+  return (
+    <Card className="p-4 animate-in-up">
+      <div>
+        <h3 className="text-lg text-cream" style={{ fontFamily: "var(--font-display), serif" }}>
+          Across the venues
+        </h3>
+        <p className="text-[11px] text-cream-muted mt-0.5">
+          Last 14 days, venue by venue — each axis scaled to the leading venue (=100)
+        </p>
+      </div>
+      <div className="mt-2 grid grid-cols-1 md:grid-cols-2 gap-4 items-center">
+        <RadarCompare data={radarData} series={series} height={240} />
+        <div className="grid grid-cols-1 gap-2">
+          {pulse.map((p, i) => {
+            const delta = p.positive - p.negative;
+            return (
+              <div
+                key={p.name}
+                className="flex items-center gap-2 flex-wrap rounded-xl border border-line bg-[rgba(43,34,26,0.02)] px-3 py-2"
+              >
+                <span
+                  className="h-2 w-2 rounded-full shrink-0"
+                  style={{ background: LOC_COLORS[i % LOC_COLORS.length] }}
+                  aria-hidden
+                />
+                <span className="text-sm text-cream truncate" style={{ fontFamily: "var(--font-display), serif" }}>
+                  {p.name}
+                </span>
+                <span className="font-mono text-[10px] text-cream-faint whitespace-nowrap">
+                  {p.mentions} mention{p.mentions === 1 ? "" : "s"}
+                </span>
+                <span className="ml-auto flex items-center gap-1.5 flex-wrap">
+                  <Badge tone={delta > 0 ? "good" : delta < 0 ? "bad" : "neutral"}>
+                    {delta >= 0 ? `+${delta}` : delta} net
+                  </Badge>
+                  {p.top_dish ? (
+                    <span className="rounded-full border border-[rgba(63,146,104,0.3)] bg-[rgba(63,146,104,0.07)] px-2 py-0.5 text-[10px] text-eucalyptus whitespace-nowrap">
+                      hero dish · {p.top_dish}
+                    </span>
+                  ) : (
+                    <span className="text-[10px] text-cream-faint whitespace-nowrap">no standout dish yet</span>
+                  )}
+                </span>
+              </div>
+            );
+          })}
+        </div>
+      </div>
+    </Card>
+  );
+}
+
 function Pill({ active, onClick, children }: { active: boolean; onClick: () => void; children: React.ReactNode }) {
   return (
     <button
@@ -401,7 +546,7 @@ function FeedCard({
       animate={{ opacity: 1, y: 0 }}
       transition={{ delay: Math.min(index, 8) * 0.05, duration: 0.4, ease: [0.21, 0.8, 0.32, 1] }}
       style={item.is_flagged ? { borderColor: "rgba(207,75,59,0.4)" } : undefined}
-      className="glass glass-hover rounded-2xl p-4"
+      className="group glass glass-hover rounded-2xl p-4"
     >
       <div className="flex items-start gap-3">
         <div className="h-9 w-9 shrink-0 rounded-full border border-line bg-[rgba(43,34,26,0.06)] flex items-center justify-center text-[11px] font-medium text-cream-muted">
@@ -456,6 +601,11 @@ function FeedCard({
             {d}
           </button>
         ))}
+        {/* hover-card content is pointer-events-none, so the agent handoff lives on the visible row */}
+        <AskPalateButton
+          prompt={`A customer review from ${item.author_name ?? "an anonymous customer"} on ${SOURCE_LABELS[item.source] ?? item.source} says: "${item.text ?? "(no text — media only)"}". Draft how we should respond and what we should learn from it.`}
+          className="ml-auto opacity-0 group-hover:opacity-100 focus-visible:opacity-100 transition-opacity"
+        />
       </div>
     </motion.article>
   );
@@ -589,7 +739,7 @@ function CompactInsight({ insight, index }: { insight: Insight; index: number })
       animate={{ opacity: 1, y: 0 }}
       transition={{ delay: Math.min(index, 6) * 0.06, duration: 0.4, ease: [0.21, 0.8, 0.32, 1] }}
       style={{ borderLeftColor: severityColor, borderLeftWidth: 2 }}
-      className={cn("glass rounded-2xl p-3.5", insight.severity === "critical" && insight.status === "new" && "accent-ring")}
+      className={cn("group glass rounded-2xl p-3.5", insight.severity === "critical" && insight.status === "new" && "accent-ring")}
     >
       <div className="flex items-center gap-1.5 flex-wrap">
         <Badge tone={badgeTone}>{insight.severity}</Badge>
@@ -613,12 +763,17 @@ function CompactInsight({ insight, index }: { insight: Insight; index: number })
           {insight.status !== "new" && <CheckCircle2 className="h-3 w-3" />}
           {insight.status}
         </span>
+        {/* hover-card content is pointer-events-none, so the agent handoff lives on the visible row */}
+        <AskPalateButton
+          prompt={`Dig deeper into the listening insight "${insight.title}". Summary: ${insight.summary} Analyse what is driving it and propose one concrete action we should take.`}
+          className="ml-auto opacity-0 group-hover:opacity-100 focus-visible:opacity-100 transition-opacity"
+        />
         <button
           type="button"
           onClick={() => setOpen((v) => !v)}
           aria-expanded={open}
           title={open ? "Collapse summary" : "Read full summary"}
-          className="ml-auto h-5 w-5 rounded-full border border-line text-cream-faint hover:text-cream hover:border-line-strong flex items-center justify-center transition-colors"
+          className="h-5 w-5 shrink-0 rounded-full border border-line text-cream-faint hover:text-cream hover:border-line-strong flex items-center justify-center transition-colors"
         >
           <ChevronDown className={cn("h-3 w-3 transition-transform", open && "rotate-180")} />
         </button>

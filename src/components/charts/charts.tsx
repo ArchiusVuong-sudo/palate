@@ -112,7 +112,7 @@ export function MetricCard({
       {spark && spark.length > 1 && (
         <div className="h-8 mt-2 -mx-1">
           {mounted && (
-            <ResponsiveContainer width="100%" height="100%">
+            <ResponsiveContainer width="100%" height="100%" initialDimension={{ width: 320, height: 120 }}>
               <LineChart data={spark.map((v, i) => ({ i, v }))}>
                 <Line type="monotone" dataKey="v" stroke={tone === "bad" ? "#cf4b3b" : "#3f9268"} strokeWidth={1.5} dot={false} isAnimationActive animationDuration={1200} />
               </LineChart>
@@ -138,7 +138,7 @@ export function TrendArea({
   const mounted = useMounted();
   if (!mounted) return <div style={{ height }} />;
   return (
-    <ResponsiveContainer width="100%" height={height} style={onPointClick ? { cursor: "pointer" } : undefined}>
+    <ResponsiveContainer width="100%" height={height} initialDimension={{ width: 480, height: 200 }} style={onPointClick ? { cursor: "pointer" } : undefined}>
       <AreaChart
         data={data}
         margin={{ top: 8, right: 8, bottom: 0, left: -18 }}
@@ -195,7 +195,7 @@ export function TopicBars({
   const mounted = useMounted();
   if (!mounted) return <div style={{ height }} />;
   return (
-    <ResponsiveContainer width="100%" height={height}>
+    <ResponsiveContainer width="100%" height={height} initialDimension={{ width: 480, height: 200 }}>
       <BarChart data={data} layout="vertical" margin={{ top: 4, right: 18, bottom: 0, left: 8 }}>
         <CartesianGrid stroke={GRID} horizontal={false} />
         <XAxis type="number" tick={AXIS} tickLine={false} axisLine={false} allowDecimals={false} />
@@ -222,7 +222,7 @@ export function SimpleBars({
   const mounted = useMounted();
   if (!mounted) return <div style={{ height }} />;
   return (
-    <ResponsiveContainer width="100%" height={height}>
+    <ResponsiveContainer width="100%" height={height} initialDimension={{ width: 480, height: 200 }}>
       <BarChart data={data} margin={{ top: 8, right: 8, bottom: 0, left: -18 }}>
         <CartesianGrid stroke={GRID} vertical={false} />
         <XAxis dataKey="label" tick={AXIS} tickLine={false} axisLine={false} />
@@ -248,7 +248,7 @@ export function Donut({
   const mounted = useMounted();
   return (
     <div className="relative" style={{ height }}>
-      {mounted && <ResponsiveContainer width="100%" height="100%">
+      {mounted && <ResponsiveContainer width="100%" height="100%" initialDimension={{ width: 320, height: 120 }}>
         <PieChart>
           <Tooltip content={<GlassTooltip />} />
           <Pie

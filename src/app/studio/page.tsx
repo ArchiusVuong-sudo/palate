@@ -4,6 +4,7 @@ import {
   getInsights,
   getOverviewStats,
   getProposedActions,
+  getRecentAgentEvents,
   getRuns,
   getSentimentTrend,
   getSourceBreakdown,
@@ -15,7 +16,7 @@ import { OverviewView } from "./view";
 export const dynamic = "force-dynamic";
 
 export default async function StudioOverviewPage() {
-  const [stats, trend, topics, dishes, sources, insights, actions, blocks, runs, assets] = await Promise.all([
+  const [stats, trend, topics, dishes, sources, insights, actions, blocks, runs, assets, agentEvents] = await Promise.all([
     getOverviewStats(),
     getSentimentTrend(14),
     getTopTopics(14, 7),
@@ -26,6 +27,7 @@ export default async function StudioOverviewPage() {
     getCanvasBlocks("dashboard", 12),
     getRuns(5),
     getAssets({ limit: 12 }),
+    getRecentAgentEvents(28),
   ]);
 
   return (
@@ -40,6 +42,7 @@ export default async function StudioOverviewPage() {
       blocks={blocks}
       runs={runs}
       assets={assets}
+      agentEvents={agentEvents}
     />
   );
 }

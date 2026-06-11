@@ -24,6 +24,8 @@ function useMounted() {
 export type HeatmapDay = { day: string; count: number; avg_sentiment: number | null };
 
 const DOW_LABELS = ["Mon", "", "Wed", "", "Fri", "", ""];
+// static month names — toLocaleDateString differs between Node and the browser ("June" vs "Jun") and breaks hydration
+const MONTHS = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
 
 function cellColor(d: HeatmapDay, max: number): string {
   if (d.count === 0) return "rgba(43,34,26,0.05)";
@@ -47,10 +49,10 @@ export function ActivityHeatmap({ data, className }: { data: HeatmapDay[]; class
     const first = w.find(Boolean);
     if (!first) return "";
     const dt = new Date(`${first.day}T00:00:00`);
-    if (i === 0) return dt.toLocaleDateString("en-AU", { month: "short" });
+    if (i === 0) return MONTHS[dt.getMonth()];
     const prev = weeks[i - 1]?.find(Boolean);
     if (prev && new Date(`${prev.day}T00:00:00`).getMonth() !== dt.getMonth()) {
-      return dt.toLocaleDateString("en-AU", { month: "short" });
+      return MONTHS[dt.getMonth()];
     }
     return "";
   });
@@ -151,7 +153,7 @@ export function RadarCompare({
   const mounted = useMounted();
   if (!mounted) return <div style={{ height }} />;
   return (
-    <ResponsiveContainer width="100%" height={height}>
+    <ResponsiveContainer width="100%" height={height} initialDimension={{ width: 480, height: 200 }}>
       <RadarChart data={data} cx="50%" cy="50%" outerRadius="74%">
         <PolarGrid stroke="rgba(43,34,26,0.1)" />
         <PolarAngleAxis

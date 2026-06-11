@@ -10,10 +10,13 @@ import { useRouter } from "next/navigation";
 import { motion } from "framer-motion";
 import { toast } from "sonner";
 import {
-  Activity, ArrowRight, CheckCheck, CheckCircle2, Ear, Film, Flame, Hash, MessageSquareQuote, PieChart, Sparkles,
+  Activity, ArrowRight, BarChart3, BookOpen, CheckCheck, CheckCircle2, Database, Ear, FileText, Film, Flame, Hash,
+  ImageIcon, Lightbulb, Mail, MessageSquareQuote, MessageSquareWarning, PenLine, PieChart, Sparkles, Wrench,
 } from "lucide-react";
 import { Badge, Button, Card, EmptyState, SectionTitle } from "@/components/ui/primitives";
 import { HoverDetail, HoverQuote, HoverRow } from "@/components/ui/hover-detail";
+import { AskPalateButton } from "@/components/agent/ask-palate";
+import { ShowMoreButton } from "@/components/ui/lazy-list";
 import { Donut, MetricCard, TopicBars, TrendArea } from "@/components/charts/charts";
 import { BlockRenderer } from "@/components/blocks/block-renderer";
 import { RunConsole } from "@/components/agent/run-console";
@@ -27,6 +30,7 @@ type OverviewStats = {
   pending_approvals: string; flagged: string;
 };
 type TrendRow = { day: string; positive: number; negative: number; neutral: number };
+type AgentEventRow = { run_id: string; workflow: string; type: string; payload: Record<string, unknown>; created_at: string };
 type NameValue = { name: string; value: number };
 type Dish = { name: string; value: number; avg_sentiment: number | null };
 
@@ -60,7 +64,7 @@ function metricValue(v: unknown): string {
 }
 
 export function OverviewView({
-  stats, trend, topics, dishes, sources, insights, actions, blocks, runs, assets,
+  stats, trend, topics, dishes, sources, insights, actions, blocks, runs, assets, agentEvents,
 }: {
   stats: OverviewStats;
   trend: TrendRow[];
@@ -72,6 +76,7 @@ export function OverviewView({
   blocks: CanvasBlockRow[];
   runs: AgentRun[];
   assets: Asset[];
+  agentEvents: AgentEventRow[];
 }) {
   const router = useRouter();
   const { state, start, decide, busy, reset } = useRunStream({ onDone: () => router.refresh() });
@@ -402,76 +407,91 @@ export function OverviewView({
           )}
         </section>
 
-        {/* ── 7 · agent proposals ── */}
-        {actions.length > 0 && (
-          <section>
-            <SubHeader
-              title="Agent proposals"
-              hint="Moves the agent recommends — approving a brief starts the briefing agent"
-              right={<Badge tone="agent">{actions.length} proposed</Badge>}
-            />
-            <div className="mt-3 grid grid-cols-1 gap-3 md:grid-cols-2">
-              {actions.map((action, i) => (
-                <motion.div
-                  key={action.id}
-                  initial={{ opacity: 0, y: 12 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: i * 0.06, duration: 0.4, ease: [0.21, 0.8, 0.32, 1] }}
-                >
-                  <Card className="p-4 h-full flex flex-col">
-                    <div className="flex items-center gap-2">
-                      <Badge tone="agent">{action.kind.replaceAll("_", " ")}</Badge>
-                      <span className="ml-auto text-[10px] text-cream-faint">{timeAgo(action.created_at)}</span>
-                    </div>
-                    <p className="mt-2.5 text-[15px] text-cream leading-snug" style={{ fontFamily: "var(--font-display), serif" }}>
-                      {action.title}
-                    </p>
-                    {action.rationale && (
-                      <p className="mt-1.5 text-xs text-cream-muted leading-relaxed line-clamp-2">{action.rationale}</p>
-                    )}
-                    <div className="mt-auto pt-3 flex items-center gap-2">
-                      <Button
-                        size="sm"
-                        loading={actionBusy === `${action.id}:approved`}
-                        disabled={actionBusy !== null}
-                        onClick={() => decideAction(action.id, "approved")}
-                      >
-                        Approve
-                      </Button>
-                      <Button
-                        size="sm"
-                        variant="ghost"
-                        loading={actionBusy === `${action.id}:dismissed`}
-                        disabled={actionBusy !== null}
-                        onClick={() => decideAction(action.id, "dismissed")}
-                      >
-                        Dismiss
-                      </Button>
-                    </div>
-                  </Card>
-                </motion.div>
-              ))}
-            </div>
-          </section>
-        )}
-
-        {/* ── 8 · agent canvas ── */}
-        {blocks.length > 0 && (
-          <section>
-            <SubHeader title="Agent canvas" hint="Charts and notes the agent published during its runs" />
-            <div className="mt-3 grid grid-cols-1 md:grid-cols-2 gap-4">
-              {blocks.map((block) => (
-                <div key={block.id} className={cn((block.kind === "chart" || block.kind === "table") && "md:col-span-2")}>
-                  <BlockRenderer block={block} />
-                  <p className="mt-1.5 text-[10px] text-cream-faint text-right">
-                    {timeAgo(block.created_at)}
-                    {block.pinned && " · pinned"}
-                  </p>
+        {/* ── 7 · agent proposals + canvas (left) · live agent activity (right) ── */}
+        <div className="grid grid-cols-1 gap-5 lg:grid-cols-3 items-start">
+          <div className={cn("grid grid-cols-1 gap-5", actions.length > 0 || blocks.length > 0 ? "lg:col-span-2" : "hidden")}>
+            {actions.length > 0 && (
+              <section>
+                <SubHeader
+                  title="Agent proposals"
+                  hint="Moves the agent recommends — approving a brief starts the briefing agent"
+                  right={<Badge tone="agent">{actions.length} proposed</Badge>}
+                />
+                <div className="mt-3 grid grid-cols-1 gap-3 md:grid-cols-2">
+                  {actions.map((action, i) => (
+                    <motion.div
+                      key={action.id}
+                      initial={{ opacity: 0, y: 12 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{ delay: i * 0.06, duration: 0.4, ease: [0.21, 0.8, 0.32, 1] }}
+                      className="group"
+                    >
+                      <Card className="p-4 h-full flex flex-col">
+                        <div className="flex items-center gap-2">
+                          <Badge tone="agent">{action.kind.replaceAll("_", " ")}</Badge>
+                          <AskPalateButton
+                            className="opacity-0 group-hover:opacity-100 focus-visible:opacity-100 transition-opacity"
+                            label="Ask"
+                            prompt={`Tell me more about this proposed action: "${action.title}". ${action.rationale ? `The agent's rationale was: ${action.rationale}` : ""} Please investigate the data behind it and recommend whether to approve it, plus any next steps.`}
+                          />
+                          <span className="ml-auto text-[10px] text-cream-faint">{timeAgo(action.created_at)}</span>
+                        </div>
+                        <p className="mt-2.5 text-[15px] text-cream leading-snug" style={{ fontFamily: "var(--font-display), serif" }}>
+                          {action.title}
+                        </p>
+                        {action.rationale && (
+                          <p className="mt-1.5 text-xs text-cream-muted leading-relaxed line-clamp-2">{action.rationale}</p>
+                        )}
+                        <div className="mt-auto pt-3 flex items-center gap-2">
+                          <Button
+                            size="sm"
+                            loading={actionBusy === `${action.id}:approved`}
+                            disabled={actionBusy !== null}
+                            onClick={() => decideAction(action.id, "approved")}
+                          >
+                            Approve
+                          </Button>
+                          <Button
+                            size="sm"
+                            variant="ghost"
+                            loading={actionBusy === `${action.id}:dismissed`}
+                            disabled={actionBusy !== null}
+                            onClick={() => decideAction(action.id, "dismissed")}
+                          >
+                            Dismiss
+                          </Button>
+                        </div>
+                      </Card>
+                    </motion.div>
+                  ))}
                 </div>
-              ))}
-            </div>
-          </section>
-        )}
+              </section>
+            )}
+
+            {/* ── 8 · agent canvas ── */}
+            {blocks.length > 0 && (
+              <section>
+                <SubHeader title="Agent canvas" hint="Charts and notes the agent published during its runs" />
+                <div className="mt-3 grid grid-cols-1 md:grid-cols-2 gap-4">
+                  {blocks.map((block) => (
+                    <div key={block.id} className={cn((block.kind === "chart" || block.kind === "table") && "md:col-span-2")}>
+                      <BlockRenderer block={block} />
+                      <p className="mt-1.5 text-[10px] text-cream-faint text-right">
+                        {timeAgo(block.created_at)}
+                        {block.pinned && " · pinned"}
+                      </p>
+                    </div>
+                  ))}
+                </div>
+              </section>
+            )}
+          </div>
+
+          <AgentNowCard
+            events={agentEvents}
+            className={cn(actions.length === 0 && blocks.length === 0 && "lg:col-span-3")}
+          />
+        </div>
 
         {/* ── 9 · recent runs footer ── */}
         {runs.length > 0 && (
@@ -630,7 +650,7 @@ function InsightCard({
       transition={{ delay: index * 0.06, duration: 0.4, ease: [0.21, 0.8, 0.32, 1] }}
       style={{ borderLeftColor: severityColor, borderLeftWidth: 2 }}
       className={cn(
-        "glass rounded-2xl p-4 h-full flex flex-col",
+        "group glass rounded-2xl p-4 h-full flex flex-col",
         insight.severity === "critical" && isOpen && "accent-ring",
         !isOpen && "opacity-70"
       )}
@@ -662,14 +682,161 @@ function InsightCard({
           ))}
         </div>
       )}
-      {isOpen && (
-        <div className="mt-auto pt-3 flex justify-end">
+      <div className="mt-auto pt-3 flex items-center justify-end gap-2">
+        <AskPalateButton
+          className="opacity-0 group-hover:opacity-100 focus-visible:opacity-100 transition-opacity"
+          prompt={`Investigate this insight and propose next steps: "${insight.title}" — ${insight.summary}`}
+        />
+        {isOpen && (
           <Button size="sm" variant="ghost" loading={acking} onClick={onAcknowledge}>
             <CheckCheck className="h-3.5 w-3.5" />
             Acknowledge
           </Button>
-        </div>
-      )}
+        )}
+      </div>
     </motion.div>
+  );
+}
+
+/* ───────────────────── "the agent right now" feed ───────────────────── */
+
+type EventIcon = React.ComponentType<{ className?: string }>;
+
+/** Aspect phrases for asset events ("Generated a 9:16 story image"). */
+const FORMAT_PHRASES: Record<string, string> = {
+  story_9x16: "9:16 story",
+  feed_4x5: "4:5 feed",
+  feed_1x1: "1:1 feed",
+  landscape_16x9: "16:9 landscape",
+};
+
+/** Human-readable line + icon per agent tool name (tool_call payload.name). */
+const TOOL_EVENTS: Record<string, { line: string; icon: EventIcon }> = {
+  db_query: { line: "Queried the database", icon: Database },
+  list_social_items: { line: "Scanned social mentions", icon: Ear },
+  update_social_item: { line: "Tagged a mention", icon: Hash },
+  save_insight: { line: "Saved an insight", icon: Lightbulb },
+  propose_action: { line: "Proposed a next move", icon: Sparkles },
+  save_brief: { line: "Drafted a brief", icon: FileText },
+  update_brief: { line: "Updated a brief", icon: FileText },
+  knowledge_list: { line: "Browsed the knowledge base", icon: BookOpen },
+  knowledge_read: { line: "Consulted the knowledge base", icon: BookOpen },
+  knowledge_write: { line: "Updated the knowledge base", icon: BookOpen },
+  knowledge_append: { line: "Recorded a lesson learnt", icon: BookOpen },
+  push_block: { line: "Published to the canvas", icon: BarChart3 },
+  request_approval: { line: "Asked for your decision", icon: MessageSquareWarning },
+  send_email: { line: "Sent an email", icon: Mail },
+  generate_image: { line: "Generated an image", icon: ImageIcon },
+  edit_image: { line: "Edited an image", icon: ImageIcon },
+  annotate_image: { line: "Annotated an image", icon: PenLine },
+  generate_video: { line: "Rendered a video", icon: Film },
+  save_caption: { line: "Wrote a caption", icon: PenLine },
+  save_review: { line: "Drafted a review reply", icon: MessageSquareQuote },
+  save_post: { line: "Drafted a post", icon: PenLine },
+  update_post: { line: "Updated a post", icon: PenLine },
+};
+
+/** Map a raw agent event row to an icon + human-readable activity line. */
+function describeEvent(e: AgentEventRow): { icon: EventIcon; line: string } {
+  const p = e.payload ?? {};
+  const s = (k: string): string | undefined => (typeof p[k] === "string" ? (p[k] as string) : undefined);
+  switch (e.type) {
+    case "asset": {
+      const kind = s("kind");
+      const fmt = FORMAT_PHRASES[s("format") ?? ""];
+      if (kind === "video") return { icon: Film, line: fmt ? `Rendered a ${fmt} video` : "Rendered a video" };
+      if (kind === "caption") return { icon: PenLine, line: "Wrote a caption" };
+      return { icon: ImageIcon, line: fmt ? `Generated a ${fmt} image` : "Generated an image" };
+    }
+    case "block": {
+      const title = s("title");
+      return { icon: BarChart3, line: title ? `Published "${title.length > 38 ? `${title.slice(0, 38)}…` : title}"` : "Published to the canvas" };
+    }
+    case "approval_request":
+      return { icon: MessageSquareWarning, line: "Asked for your decision" };
+    case "done": {
+      const status = s("status");
+      return {
+        icon: CheckCircle2,
+        line: status === "failed" ? "A run failed" : status === "cancelled" ? "A run was cancelled" : "Wrapped up a run",
+      };
+    }
+    case "tool_call": {
+      const name = s("name") ?? "tool";
+      return TOOL_EVENTS[name] ?? { icon: Wrench, line: name };
+    }
+    default:
+      return { icon: Wrench, line: e.type.replaceAll("_", " ") };
+  }
+}
+
+/**
+ * "The agent right now" — compact live feed of recent agent events. Silently
+ * refetches server data every 20s while the tab is visible.
+ */
+function AgentNowCard({ events, className }: { events: AgentEventRow[]; className?: string }) {
+  const router = useRouter();
+  const [visible, setVisible] = React.useState(8);
+
+  React.useEffect(() => {
+    const id = window.setInterval(() => {
+      if (document.visibilityState === "visible") router.refresh();
+    }, 20_000);
+    return () => window.clearInterval(id);
+  }, [router]);
+
+  const shown = events.slice(0, visible);
+
+  return (
+    <Card className={cn("p-4 animate-in-up", className)}>
+      <div className="flex items-start gap-2 mb-3">
+        <div>
+          <h3 className="text-lg text-cream leading-tight" style={{ fontFamily: "var(--font-display), serif" }}>
+            The agent right now
+          </h3>
+          <p className="text-[11px] text-cream-faint mt-0.5">Every move, as it lands</p>
+        </div>
+        <span className="ml-auto mt-1.5 inline-flex items-center gap-1.5 text-[10px] uppercase tracking-[0.14em] text-eucalyptus shrink-0">
+          <span className="dot dot-pulse bg-eucalyptus" />
+          live
+        </span>
+      </div>
+      {events.length === 0 ? (
+        <EmptyState
+          className="py-8"
+          icon={<Activity />}
+          title="No agent activity yet"
+          hint="Run a sweep or the full pipeline to see the agent at work."
+        />
+      ) : (
+        <>
+          <div className="grid grid-cols-1 gap-0.5">
+            {shown.map((e, i) => {
+              const { icon: Icon, line } = describeEvent(e);
+              return (
+                <div
+                  key={`${e.run_id}-${e.created_at}-${i}`}
+                  className="flex items-center gap-2.5 rounded-xl px-1.5 py-1.5 hover:bg-[rgba(43,34,26,0.04)] transition-colors"
+                >
+                  <span className="h-6 w-6 shrink-0 rounded-full border border-line bg-[rgba(43,34,26,0.03)] flex items-center justify-center">
+                    <Icon className="h-3 w-3 text-cream-muted" />
+                  </span>
+                  <span className="text-xs text-cream flex-1 min-w-0 truncate">{line}</span>
+                  <Badge tone="neutral" className="shrink-0 hidden sm:inline-flex">
+                    {WORKFLOW_LABELS[e.workflow] ?? e.workflow}
+                  </Badge>
+                  <span className="text-[10px] text-cream-faint whitespace-nowrap shrink-0">{timeAgo(e.created_at)}</span>
+                </div>
+              );
+            })}
+          </div>
+          <ShowMoreButton
+            className="mt-2"
+            remaining={events.length - shown.length}
+            onClick={() => setVisible((v) => v + 12)}
+          />
+        </>
+      )}
+    </Card>
   );
 }

@@ -73,3 +73,17 @@ cn, timeAgo, fmtDate, fmtDateTime, fmtNumber, fmtUsd, SOURCE_LABELS, CHANNEL_LAB
 - Keep every page file self-sufficient; no new npm deps.
 - `./node_modules/.bin/tsc --noEmit` must pass for your files before you finish.
 - next/image is configured for qannfgylnsqmyocsfyse.supabase.co; for storage images prefer plain `<img>` (dynamic sizes) — eslint is off for builds.
+
+## LIGHT THEME (current — June 11 wave 3)
+The studio is now LIGHT: warm paper background (#f7f3ea), espresso ink text (#2b221a), white glass cards. Token names are unchanged (`text-cream` is now DARK text, `bg-ink` is the paper background) — keep using the same utility classes and you inherit the theme.
+- NEVER hardcode dark-theme rgba values. Overlay/hover/border tints use `rgba(43,34,26,X)` (espresso). Terracotta accents: `rgba(196,99,58,X)`. Agent-green: `rgba(63,146,104,X)`. Amber: `rgba(201,127,61,X)`. Sentiment: good #2f9e63 · bad #cf4b3b · warn #b98a23 · info #4f87ad.
+- Dark chips/scrims directly ON photos (bg-black/50-70 + backdrop-blur) are correct — keep that pattern for image overlays only.
+- Single-column stacks MUST be `grid grid-cols-1 gap-*` (bare `grid gap-*` lets nowrap content blow the layout — this bit us twice).
+
+## New shared primitives (wave 3)
+- `ActivityHeatmap` + `RadarCompare` from `@/components/charts/extra` — GitHub-style day grid ({day:'YYYY-MM-DD',count,avg_sentiment}[]) and location radar (data rows keyed by `metric`, series {key,name,color}).
+- `AskPalateButton`/`askPalate(prompt)` from `@/components/agent/ask-palate` — chip that opens the copilot drawer prefilled with context. Put it on hover cards / detail panels; write prompts that quote the item's content + ids in plain language.
+- `fireConfetti(x?,y?)` from `@/components/ui/confetti` — celebration burst at the given viewport coords; use sparingly on human approve/publish moments only.
+- `RunConsole` accepts optional `onFollowUp(text)` — POST /api/agent {followUpRunId, prompt} resumes a finished run's session; dispatch `palate:run-started` with the returned {runId, workflow} so the dock attaches.
+- `HoverDetail` is now safe inside any layout (Range-based measurement) and accepts side "auto"|"left"|"right"|"top".
+- Queries available in `@/lib/queries`: getMentionHeatmap, getLocationPulse, getRunTotals, getRunDaily, getCalendarData(fromISO,toISO), getRecentAgentEvents, getKnowledgeRevisions.

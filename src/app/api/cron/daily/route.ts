@@ -4,6 +4,7 @@
  * ?pipeline=1 to run the whole daily cycle instead.
  */
 import { NextResponse } from "next/server";
+import { one } from "@/lib/db";
 import { startAgentRun } from "@/lib/agent/run";
 import { missionPrompt } from "@/lib/agent/workflows";
 
@@ -11,6 +12,13 @@ export const runtime = "nodejs";
 export const maxDuration = 800;
 
 async function trigger(req: Request) {
+  // Autopilot kill-switch (Settings → Autopilot). Missing row = enabled.
+  const autopilot = await one<{ value: { enabled?: boolean } | null }>(
+    `select value from app_settings where key = 'autopilot'`
+  );
+  if (autopilot && autopilot.value?.enabled === false) {
+    return NextResponse.json({ skipped: "autopilot off" });
+  }
   const url = new URL(req.url);
   const pipeline = url.searchParams.get("pipeline") === "1";
   // Drip in fresh demo items first (real deployments: connector polls here).

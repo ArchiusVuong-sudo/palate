@@ -1,11 +1,11 @@
-import { getRuns } from "@/lib/queries";
+import { getRunDaily, getRuns, getRunTotals } from "@/lib/queries";
 import { q } from "@/lib/db";
 import { RunsView, type RunRow } from "./view";
 
 export const dynamic = "force-dynamic";
 
 export default async function RunsPage() {
-  const runs = await getRuns(40);
+  const [runs, totals, daily] = await Promise.all([getRuns(40), getRunTotals(), getRunDaily(14)]);
 
   // getRuns doesn't select the mission prompt — fetch it alongside so the
   // expanded audit view can show the full task each run was given.
@@ -19,5 +19,5 @@ export default async function RunsPage() {
   }
 
   const rows: RunRow[] = runs.map((r) => ({ ...r, prompt: prompts.get(r.id) ?? null }));
-  return <RunsView runs={rows} />;
+  return <RunsView runs={rows} totals={totals} daily={daily} />;
 }
