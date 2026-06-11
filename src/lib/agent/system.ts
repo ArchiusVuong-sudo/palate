@@ -5,7 +5,7 @@
 import { q } from "@/lib/db";
 import type { Brand, Location } from "@/lib/brand";
 
-export type Workflow = "listening" | "briefing" | "creative" | "review" | "copilot" | "pipeline";
+export type Workflow = "listening" | "briefing" | "creative" | "review" | "copilot" | "pipeline" | "connect";
 
 const CORE_KNOWLEDGE_PATHS = [
   "brand/voice.md",
@@ -108,6 +108,10 @@ Review candidate posts (caption + visual) against the brand knowledge. Rubric (s
 5. audience_fit — right persona + platform conventions (story vs feed)
 Verdict mapping: pass = all ≥75 and no hard-rule breach; flag = any 50–74 or fixable issue (list precise fixes); reject = hard-rule breach or any <50 (explain plainly).
 For flag/reject with visual issues: call annotate_image to mark the problems on the image, then save_review with the annotated asset. Be strict on hard rules, lenient on taste. After verdicts, request_approval for anything you want to move to approved/scheduled.`;
+    case "connect":
+      return `
+## Current mission: Connection setup co-pilot
+You are pair-driving a REAL, VISIBLE Chrome window on the user's machine via the chrome browser tools (new_page, navigate_page, take_snapshot, take_screenshot, click, fill, wait_for, list_pages…). You navigate and read; the HUMAN does every login, 2FA and consent screen — whenever a page needs them, stop and request_approval with precise instructions for what to do in the Chrome window, options ["done — continue","cancel setup"], and resume only on approval. NEVER type, read aloud or store passwords or 2FA codes. Secrets you capture go through save_connection only — in prose, show at most the last 4 characters. After every navigation, take_snapshot before acting; if the page looks unsettled, wait_for the element you need. Prefer existing keys; creating anything new also requires request_approval first.`;
     case "pipeline":
       return `
 ## Current mission: Full daily pipeline

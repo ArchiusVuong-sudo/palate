@@ -13,7 +13,7 @@ import { one, q } from "@/lib/db";
 export const runtime = "nodejs";
 export const maxDuration = 800;
 
-const WORKFLOWS: Workflow[] = ["listening", "briefing", "creative", "review", "copilot", "pipeline"];
+const WORKFLOWS: Workflow[] = ["listening", "briefing", "creative", "review", "copilot", "pipeline", "connect"];
 
 export async function POST(req: Request) {
   const body = await req.json().catch(() => ({}));

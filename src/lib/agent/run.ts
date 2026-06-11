@@ -14,16 +14,26 @@ import { buildSystemPrompt, type Workflow } from "@/lib/agent/system";
 import { runBus } from "@/lib/agent/bridge";
 import {
   buildDataTools, buildInsightTools, buildBriefTools, buildKnowledgeTools,
-  buildCanvasTools, buildApprovalTools, buildEmailTools, type ToolCtx,
+  buildCanvasTools, buildApprovalTools, buildEmailTools, buildConnectionTools, type ToolCtx,
 } from "@/lib/agent/tools";
 import { buildCreativeTools, buildReviewTools } from "@/lib/agent/tools-creative";
+
+// chrome-devtools-mcp tools — allowedTools needs explicit names (server-level
+// "mcp__chrome" shorthand is not honoured there)
+const CHROME_TOOL_NAMES = [
+  "click", "close_page", "drag", "emulate", "evaluate_script", "fill", "fill_form",
+  "get_console_message", "get_network_request", "handle_dialog", "hover",
+  "list_console_messages", "list_network_requests", "list_pages", "navigate_page",
+  "new_page", "press_key", "resize_page", "select_page", "take_screenshot",
+  "take_snapshot", "type_text", "upload_file", "wait_for",
+].map((t) => `mcp__chrome__${t}`);
 
 const TOOL_NAMES = [
   "db_query", "list_social_items", "update_social_item",
   "save_insight", "propose_action",
   "save_brief", "update_brief",
   "knowledge_list", "knowledge_read", "knowledge_write", "knowledge_append",
-  "push_block", "request_approval", "send_email",
+  "push_block", "request_approval", "send_email", "save_connection",
   "generate_image", "edit_image", "annotate_image", "generate_video", "save_caption",
   "save_review", "save_post", "update_post",
 ].map((t) => `mcp__palate__${t}`);
@@ -83,10 +93,26 @@ async function executeRun(runId: string, brandId: string, opts: StartRunOpts) {
       ...buildCanvasTools(ctx),
       ...buildApprovalTools(ctx),
       ...buildEmailTools(ctx),
+      ...buildConnectionTools(ctx),
       ...buildCreativeTools(ctx),
       ...buildReviewTools(ctx),
     ],
   });
+
+  // connection wizard: mount a real, headed Chrome the agent co-drives with the user.
+  // chrome-devtools-mcp keeps a persistent profile, so the user's logins survive sessions.
+  // NOTE: absolute path — the agent subprocess cwd is the workspace dir, where npx can't
+  // resolve the locally installed package.
+  const mcpServers: NonNullable<Parameters<typeof query>[0]["options"]>["mcpServers"] = { palate: server };
+  if (opts.workflow === "connect") {
+    mcpServers.chrome = {
+      type: "stdio",
+      command: path.join(process.cwd(), "node_modules", ".bin", "chrome-devtools-mcp"),
+      // dedicated persistent profile: logins survive sessions, and it never
+      // collides with any other chrome-devtools-mcp instance on the machine
+      args: ["--userDataDir", path.join(process.cwd(), ".agent-workspace", "chrome-profile")],
+    };
+  }
 
   const workspace = path.join(process.cwd(), ".agent-workspace", brandId);
   mkdirSync(workspace, { recursive: true });
@@ -111,9 +137,11 @@ async function executeRun(runId: string, brandId: string, opts: StartRunOpts) {
         systemPrompt,
         model: process.env.AGENT_MODEL ?? "claude-opus-4-8",
         fallbackModel: process.env.AGENT_FALLBACK_MODEL ?? "claude-sonnet-4-6",
-        mcpServers: { palate: server },
-        tools: ["WebSearch", "WebFetch"],
-        allowedTools: [...TOOL_NAMES, "WebSearch", "WebFetch"],
+        mcpServers,
+        // ToolSearch matters: external MCP tools (chrome) register late and arrive
+        // deferred — without ToolSearch in the built-in set the agent can never load them.
+        tools: ["WebSearch", "WebFetch", ...(opts.workflow === "connect" ? (["ToolSearch"] as const) : [])],
+        allowedTools: [...TOOL_NAMES, "WebSearch", "WebFetch", ...(opts.workflow === "connect" ? [...CHROME_TOOL_NAMES, "ToolSearch"] : [])],
         permissionMode: "bypassPermissions",
         allowDangerouslySkipPermissions: true,
         includePartialMessages: true,

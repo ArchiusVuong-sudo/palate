@@ -434,8 +434,15 @@ export function buildEmailTools(ctx: ToolCtx) {
          values ($1,$2,$3,$4,$5,$6) returning id`,
         [ctx.brandId, a.to, a.subject, a.html, a.text ?? null, ctx.runId]);
 
-      const user = process.env.GMAIL_USER;
-      const pass = process.env.GMAIL_APP_PASSWORD;
+      // env wins; otherwise fall back to creds saved by the connection wizard
+      let user = process.env.GMAIL_USER;
+      let pass = process.env.GMAIL_APP_PASSWORD;
+      if (!user || !pass) {
+        const conn = await one<{ config: { user?: string; app_password?: string } }>(
+          `select config from connections where brand_id=$1 and provider='gmail' and status='connected'`, [ctx.brandId]);
+        user = user || conn?.config?.user;
+        pass = pass || conn?.config?.app_password;
+      }
       if (user && pass) {
         const transporter = nodemailer.createTransport({ service: "gmail", auth: { user, pass } });
         await transporter.sendMail({ from: user, to: a.to.join(", "), subject: a.subject, html: a.html, text: a.text });
@@ -448,4 +455,34 @@ export function buildEmailTools(ctx: ToolCtx) {
     })
   );
   return [sendEmail];
+}
+
+// ============================ connections =================================
+
+export function buildConnectionTools(ctx: ToolCtx) {
+  const saveConnection = tool(
+    "save_connection",
+    "Save credentials/config for a data connection found during connection setup (the Chrome co-driving mission). Secrets are stored server-side in the connections table — never echo a full secret back in prose.",
+    {
+      provider: z.enum(["google_reviews", "facebook", "instagram", "gmail"]),
+      status: z.enum(["connected", "pending", "error"]).default("connected"),
+      config: z
+        .record(z.string(), z.string())
+        .describe('Key/value config. gmail: {user, app_password}. google_reviews: {api_key}. facebook/instagram: {access_token, app_id?}. Add {note} for anything the team should know.'),
+    },
+    safe(async (a) => {
+      await q(
+        `insert into connections (brand_id, provider, status, config, last_synced_at)
+         values ($1,$2,$3,$4, case when $3='connected' then now() else null end)
+         on conflict (brand_id, provider)
+         do update set status=$3, config=connections.config || $4::jsonb,
+                       last_synced_at=case when $3='connected' then now() else connections.last_synced_at end`,
+        [ctx.brandId, a.provider, a.status, JSON.stringify(a.config)]
+      );
+      const keys = Object.keys(a.config).join(", ");
+      runBus.emit(ctx.runId, "status", { note: `connection ${a.provider} → ${a.status} (config: ${keys})` });
+      return textResult({ ok: true, provider: a.provider, status: a.status, saved_keys: Object.keys(a.config) });
+    })
+  );
+  return [saveConnection];
 }

@@ -61,6 +61,7 @@ const PROVIDER_META: Record<string, {
 function ConnectionBadge({ status }: { status: string }) {
   if (status === "demo") return <Badge tone="warn">demo data</Badge>;
   if (status === "connected") return <Badge tone="good">connected</Badge>;
+  if (status === "pending") return <Badge tone="accent">setup in progress</Badge>;
   if (status === "error") return <Badge tone="bad">error</Badge>;
   return <Badge tone="neutral">disconnected</Badge>;
 }
@@ -285,6 +286,30 @@ function ConnectionCard({
   const meta = PROVIDER_META[connection.provider];
   const [token, setToken] = React.useState("");
   const [saving, setSaving] = React.useState(false);
+  const [launching, setLaunching] = React.useState(false);
+
+  /* connection wizard — the agent co-drives a visible Chrome window to find the key */
+  const setupWithAgent = async () => {
+    setLaunching(true);
+    try {
+      const res = await fetch("/api/agent", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ workflow: "connect", params: { provider: connection.provider } }),
+      });
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+      const { runId } = await res.json();
+      window.dispatchEvent(new CustomEvent("palate:run-started", { detail: { runId, workflow: "connect" } }));
+      toast.success("Connection wizard started", {
+        description: "A Chrome window will open — the agent drives, you handle any sign-in. Watch it in the dock.",
+        duration: 9000,
+      });
+    } catch {
+      toast.error("Couldn't start the setup agent");
+    } finally {
+      setLaunching(false);
+    }
+  };
 
   const save = async () => {
     const value = token.trim();
@@ -346,7 +371,7 @@ function ConnectionCard({
             <div className="flex items-center gap-2.5 rounded-xl border border-dashed border-line-strong bg-[rgba(43,34,26,0.03)] px-3 py-2.5">
               <KeyRound className="h-3.5 w-3.5 text-eucalyptus shrink-0" />
               <code className="font-mono text-[10.5px] text-cream-muted leading-relaxed">
-                set GMAIL_USER + GMAIL_APP_PASSWORD in .env.local
+                app password via the wizard, or GMAIL_USER + GMAIL_APP_PASSWORD in .env.local
               </code>
             </div>
           ) : (
@@ -367,6 +392,10 @@ function ConnectionCard({
               </p>
             </>
           )}
+          <Button size="sm" variant="outline" loading={launching} onClick={setupWithAgent} className="justify-center">
+            <Globe className="h-3.5 w-3.5 text-eucalyptus" />
+            Set up with the agent — live in Chrome
+          </Button>
         </div>
       </Card>
     </motion.div>
