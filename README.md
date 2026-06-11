@@ -1,5 +1,9 @@
 # Palate — AI marketing studio for restaurants
 
+> **Live demo:** [palate-psi.vercel.app](https://palate-psi.vercel.app) — sign in with `owner@marlowandsage.com` / `palate2026`
+> **Submission report:** [docs/report/Palate_Submission_Report.pdf](docs/report/Palate_Submission_Report.pdf) (answers all 4 assignment steps + both bonus questions)
+> Long agent runs and the Chrome connection wizard are best experienced locally (`pnpm install && pnpm dev`) — serverless caps runs at 5 minutes.
+
 Built as the AT Solutions take-home ("AI Agent Solutions Consultant"), implemented end-to-end instead of on paper: all four workflow steps from the brief run as a single collaborating agent system for a fictional Australian F&B group, **Marlow & Sage** (Surry Hills · Fitzroy · Burleigh Heads).
 
 | Step in the brief | In Palate |
