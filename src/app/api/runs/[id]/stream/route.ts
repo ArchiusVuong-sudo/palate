@@ -6,7 +6,7 @@ import { q, one } from "@/lib/db";
 import { runBus, type RunEvent } from "@/lib/agent/bridge";
 
 export const runtime = "nodejs";
-export const maxDuration = 800;
+export const maxDuration = 300; // Vercel hobby ceiling
 
 export async function GET(
   req: Request,

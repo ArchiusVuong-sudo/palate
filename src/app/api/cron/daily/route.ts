@@ -9,7 +9,7 @@ import { startAgentRun } from "@/lib/agent/run";
 import { missionPrompt } from "@/lib/agent/workflows";
 
 export const runtime = "nodejs";
-export const maxDuration = 800;
+export const maxDuration = 300; // Vercel hobby ceiling
 
 async function trigger(req: Request) {
   // Autopilot kill-switch (Settings → Autopilot). Missing row = enabled.

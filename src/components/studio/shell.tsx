@@ -8,7 +8,7 @@ import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
 import {
-  Activity, BookOpen, CalendarDays, Ear, FileText, Home, Inbox, MessageCircle,
+  Activity, BookOpen, CalendarDays, Ear, FileText, Home, Inbox, LogOut, MessageCircle,
   Palette, Search, Settings, ShieldCheck, X,
 } from "lucide-react";
 import { CopilotPanel } from "@/components/agent/copilot-panel";
@@ -153,11 +153,21 @@ export function StudioShell({
           })}
         </nav>
 
-        <div className="px-5 py-4 border-t border-line">
-          <p className="text-[10px] text-cream-faint leading-relaxed">
+        <div className="px-5 py-4 border-t border-line flex items-center gap-2">
+          <p className="text-[10px] text-cream-faint leading-relaxed min-w-0 flex-1">
             Marlow &amp; Sage<br />
             <span className="text-cream-muted">Surry Hills · Fitzroy · Burleigh</span>
           </p>
+          <button
+            onClick={async () => {
+              await fetch("/api/auth/logout", { method: "POST" });
+              window.location.href = "/login";
+            }}
+            title="Sign out"
+            className="shrink-0 p-1.5 rounded-lg text-cream-faint hover:text-cream hover:bg-[rgba(43,34,26,0.06)] transition-colors"
+          >
+            <LogOut className="h-3.5 w-3.5" />
+          </button>
         </div>
       </aside>
 

@@ -11,7 +11,7 @@ import { getActiveBrand } from "@/lib/brand";
 import { one, q } from "@/lib/db";
 
 export const runtime = "nodejs";
-export const maxDuration = 800;
+export const maxDuration = 300; // Vercel hobby ceiling
 
 const WORKFLOWS: Workflow[] = ["listening", "briefing", "creative", "review", "copilot", "pipeline", "connect"];
 
@@ -20,6 +20,14 @@ export async function POST(req: Request) {
   const workflow = (body.workflow ?? "copilot") as Workflow;
   if (!WORKFLOWS.includes(workflow)) {
     return NextResponse.json({ error: `unknown workflow ${workflow}` }, { status: 400 });
+  }
+
+  // the connection wizard drives a local Chrome window — meaningless on a server
+  if (workflow === "connect" && process.env.VERCEL) {
+    return NextResponse.json(
+      { error: "The connection wizard opens a Chrome window on your machine — run Palate locally to use it." },
+      { status: 400 }
+    );
   }
 
   // Follow-up on a finished run — same SDK session, full context retained.
