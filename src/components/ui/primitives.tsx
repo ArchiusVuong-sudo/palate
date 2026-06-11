@@ -22,12 +22,12 @@ export const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
         size === "md" && "h-9.5 px-4 text-sm",
         size === "lg" && "h-11 px-6 text-sm",
         variant === "primary" &&
-          "bg-gradient-to-b from-[#d4744a] to-terracotta text-[#1a0f08] shadow-[0_8px_24px_-10px_rgba(196,99,58,0.7),inset_0_1px_0_rgba(255,255,255,0.25)] hover:brightness-110 active:scale-[0.98]",
-        variant === "ghost" && "text-cream-muted hover:text-cream hover:bg-[rgba(244,237,227,0.06)]",
+          "bg-gradient-to-b from-[#d4744a] to-terracotta text-white shadow-[0_8px_24px_-10px_rgba(196,99,58,0.7),inset_0_1px_0_rgba(255,255,255,0.25)] hover:brightness-110 active:scale-[0.98]",
+        variant === "ghost" && "text-cream-muted hover:text-cream hover:bg-[rgba(43,34,26,0.06)]",
         variant === "outline" &&
-          "border border-line-strong text-cream hover:bg-[rgba(244,237,227,0.05)] hover:border-[rgba(244,237,227,0.3)]",
-        variant === "subtle" && "bg-[rgba(244,237,227,0.07)] text-cream hover:bg-[rgba(244,237,227,0.12)]",
-        variant === "danger" && "bg-[rgba(239,116,102,0.14)] text-bad border border-[rgba(239,116,102,0.3)] hover:bg-[rgba(239,116,102,0.22)]",
+          "border border-line-strong text-cream hover:bg-[rgba(43,34,26,0.05)] hover:border-[rgba(43,34,26,0.3)]",
+        variant === "subtle" && "bg-[rgba(43,34,26,0.07)] text-cream hover:bg-[rgba(43,34,26,0.12)]",
+        variant === "danger" && "bg-[rgba(207,75,59,0.14)] text-bad border border-[rgba(207,75,59,0.3)] hover:bg-[rgba(207,75,59,0.22)]",
         className
       )}
       {...props}
@@ -53,13 +53,13 @@ export function Badge({
     <span
       className={cn(
         "inline-flex items-center gap-1.5 rounded-full px-2.5 py-0.5 text-[11px] font-medium tracking-wide border",
-        tone === "neutral" && "bg-[rgba(244,237,227,0.06)] text-cream-muted border-line",
-        tone === "good" && "bg-[rgba(90,212,142,0.1)] text-good border-[rgba(90,212,142,0.25)]",
-        tone === "bad" && "bg-[rgba(239,116,102,0.1)] text-bad border-[rgba(239,116,102,0.25)]",
-        tone === "warn" && "bg-[rgba(232,185,79,0.1)] text-warn border-[rgba(232,185,79,0.25)]",
-        tone === "info" && "bg-[rgba(127,181,214,0.1)] text-info border-[rgba(127,181,214,0.25)]",
+        tone === "neutral" && "bg-[rgba(43,34,26,0.06)] text-cream-muted border-line",
+        tone === "good" && "bg-[rgba(47,158,99,0.1)] text-good border-[rgba(47,158,99,0.25)]",
+        tone === "bad" && "bg-[rgba(207,75,59,0.1)] text-bad border-[rgba(207,75,59,0.25)]",
+        tone === "warn" && "bg-[rgba(185,138,35,0.1)] text-warn border-[rgba(185,138,35,0.25)]",
+        tone === "info" && "bg-[rgba(79,135,173,0.1)] text-info border-[rgba(79,135,173,0.25)]",
         tone === "accent" && "bg-[rgba(196,99,58,0.12)] text-amber border-[rgba(196,99,58,0.3)]",
-        tone === "agent" && "bg-[rgba(111,191,148,0.1)] text-eucalyptus border-[rgba(111,191,148,0.25)]",
+        tone === "agent" && "bg-[rgba(63,146,104,0.1)] text-eucalyptus border-[rgba(63,146,104,0.25)]",
         className
       )}
     >
@@ -113,7 +113,7 @@ export const Input = React.forwardRef<HTMLInputElement, React.InputHTMLAttribute
     <input
       ref={ref}
       className={cn(
-        "h-9.5 w-full rounded-xl bg-[rgba(244,237,227,0.05)] border border-line px-3.5 text-sm text-cream placeholder:text-cream-faint focus:border-[rgba(196,99,58,0.5)] focus:bg-[rgba(244,237,227,0.07)] transition-colors",
+        "h-9.5 w-full rounded-xl bg-[rgba(43,34,26,0.05)] border border-line px-3.5 text-sm text-cream placeholder:text-cream-faint focus:border-[rgba(196,99,58,0.5)] focus:bg-[rgba(43,34,26,0.07)] transition-colors",
         className
       )}
       {...props}
@@ -127,7 +127,7 @@ export const Textarea = React.forwardRef<HTMLTextAreaElement, React.TextareaHTML
     <textarea
       ref={ref}
       className={cn(
-        "w-full rounded-xl bg-[rgba(244,237,227,0.05)] border border-line px-3.5 py-2.5 text-sm text-cream placeholder:text-cream-faint focus:border-[rgba(196,99,58,0.5)] focus:bg-[rgba(244,237,227,0.07)] transition-colors resize-none",
+        "w-full rounded-xl bg-[rgba(43,34,26,0.05)] border border-line px-3.5 py-2.5 text-sm text-cream placeholder:text-cream-faint focus:border-[rgba(196,99,58,0.5)] focus:bg-[rgba(43,34,26,0.07)] transition-colors resize-none",
         className
       )}
       {...props}
@@ -200,7 +200,7 @@ export function Modal({
   if (!open) return null;
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-      <div className="absolute inset-0 bg-black/70 backdrop-blur-sm animate-in-up" style={{ animationDuration: "0.2s" }} onClick={onClose} />
+      <div className="absolute inset-0 bg-black/35 backdrop-blur-sm animate-in-up" style={{ animationDuration: "0.2s" }} onClick={onClose} />
       <div
         className={cn(
           "relative glass rounded-2xl w-full max-h-[88vh] overflow-y-auto animate-in-up",

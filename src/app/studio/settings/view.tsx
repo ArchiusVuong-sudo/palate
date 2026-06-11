@@ -37,12 +37,12 @@ const PROVIDER_META: Record<string, {
   google_reviews: {
     icon: Star,
     copy: "Google Business Profile API — reviews for all 3 locations.",
-    tint: "rgba(232,185,79,0.12)", ring: "rgba(232,185,79,0.3)", iconCls: "text-warn",
+    tint: "rgba(185,138,35,0.12)", ring: "rgba(185,138,35,0.3)", iconCls: "text-warn",
   },
   facebook: {
     icon: MessageSquare,
     copy: "Meta Graph API — page comments & messages.",
-    tint: "rgba(127,181,214,0.12)", ring: "rgba(127,181,214,0.3)", iconCls: "text-info",
+    tint: "rgba(79,135,173,0.12)", ring: "rgba(79,135,173,0.3)", iconCls: "text-info",
   },
   instagram: {
     icon: AtSign,
@@ -52,7 +52,7 @@ const PROVIDER_META: Record<string, {
   gmail: {
     icon: Mail,
     copy: "SMTP app password — lets the agent actually send.",
-    tint: "rgba(111,191,148,0.12)", ring: "rgba(111,191,148,0.3)", iconCls: "text-eucalyptus",
+    tint: "rgba(63,146,104,0.12)", ring: "rgba(63,146,104,0.3)", iconCls: "text-eucalyptus",
   },
 };
 
@@ -128,7 +128,7 @@ function BrandCard({ brand }: { brand: Brand }) {
             {handles.map((h) => (
               <span
                 key={h.label}
-                className="inline-flex items-center gap-1.5 rounded-full border border-line bg-[rgba(244,237,227,0.04)] px-3 py-1 text-[11.5px] text-cream-muted"
+                className="inline-flex items-center gap-1.5 rounded-full border border-line bg-[rgba(43,34,26,0.04)] px-3 py-1 text-[11.5px] text-cream-muted"
               >
                 <h.icon className="h-3 w-3 text-cream-faint" />
                 {h.label}
@@ -228,7 +228,7 @@ function ConnectionCard({
 
         <div className="mt-4 pt-4 border-t border-line grid grid-cols-1 gap-2">
           {connection.provider === "gmail" ? (
-            <div className="flex items-center gap-2.5 rounded-xl border border-dashed border-line-strong bg-[rgba(244,237,227,0.03)] px-3 py-2.5">
+            <div className="flex items-center gap-2.5 rounded-xl border border-dashed border-line-strong bg-[rgba(43,34,26,0.03)] px-3 py-2.5">
               <KeyRound className="h-3.5 w-3.5 text-eucalyptus shrink-0" />
               <code className="font-mono text-[10.5px] text-cream-muted leading-relaxed">
                 set GMAIL_USER + GMAIL_APP_PASSWORD in .env.local
@@ -277,7 +277,7 @@ function AgentCard() {
   return (
     <Card className="p-5">
       <div className="flex items-center gap-2.5">
-        <span className="inline-flex h-10 w-10 items-center justify-center rounded-2xl border border-[rgba(111,191,148,0.3)] bg-[rgba(111,191,148,0.12)]">
+        <span className="inline-flex h-10 w-10 items-center justify-center rounded-2xl border border-[rgba(63,146,104,0.3)] bg-[rgba(63,146,104,0.12)]">
           <Bot className="h-4.5 w-4.5 text-eucalyptus" />
         </span>
         <div>
@@ -291,7 +291,7 @@ function AgentCard() {
 
       <div className="mt-5 grid sm:grid-cols-2 lg:grid-cols-4 gap-3">
         {AGENT_MODELS.map((m) => (
-          <div key={m.label} className="rounded-xl border border-line bg-[rgba(244,237,227,0.025)] p-3.5">
+          <div key={m.label} className="rounded-xl border border-line bg-[rgba(43,34,26,0.025)] p-3.5">
             <p className="text-[10px] uppercase tracking-[0.14em] text-cream-faint flex items-center gap-1.5">
               <m.icon className="h-3 w-3" /> {m.label}
             </p>

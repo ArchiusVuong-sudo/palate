@@ -368,7 +368,7 @@ export function CreativeView({
 
       {/* catalogue control bar — kind, status and format filters */}
       {creativeAssets.length > 0 && (
-        <div className="sticky top-0 z-20 mt-6 flex flex-wrap items-center gap-1.5 rounded-2xl border border-line bg-[rgba(11,14,12,0.82)] backdrop-blur-xl px-3 py-2.5">
+        <div className="sticky top-0 z-20 mt-6 flex flex-wrap items-center gap-1.5 rounded-2xl border border-line bg-[rgba(255,253,248,0.82)] backdrop-blur-xl px-3 py-2.5">
           {KIND_PILLS.map((k) => (
             <Pill key={k.id} active={kindFilter === k.id} onClick={() => setKindFilter(k.id)}>
               {k.label}
@@ -451,7 +451,7 @@ export function CreativeView({
                 return (
                   <span
                     key={kind}
-                    className="inline-flex items-center gap-1 rounded-full border border-line bg-[rgba(244,237,227,0.03)] px-2 py-0.5 font-mono text-[9px] text-cream-faint"
+                    className="inline-flex items-center gap-1 rounded-full border border-line bg-[rgba(43,34,26,0.03)] px-2 py-0.5 font-mono text-[9px] text-cream-faint"
                   >
                     <Icon className="h-3 w-3" />
                     {n} {kind === "caption" && n === 1 ? "caption" : label}
@@ -500,7 +500,7 @@ export function CreativeView({
                   <button
                     type="button"
                     onClick={() => toggleGroup(group.key)}
-                    className="inline-flex items-center gap-1.5 rounded-full border border-line px-4 py-1.5 text-[11px] text-cream-muted hover:text-cream hover:border-line-strong hover:bg-[rgba(244,237,227,0.04)] transition-all"
+                    className="inline-flex items-center gap-1.5 rounded-full border border-line px-4 py-1.5 text-[11px] text-cream-muted hover:text-cream hover:border-line-strong hover:bg-[rgba(43,34,26,0.04)] transition-all"
                   >
                     <ChevronUp className="h-3 w-3" />
                     Collapse
@@ -556,7 +556,7 @@ export function CreativeView({
             </div>
             <button
               onClick={() => setLightbox(null)}
-              className="absolute top-4 right-4 text-cream-faint hover:text-cream p-1 rounded-lg hover:bg-[rgba(244,237,227,0.06)]"
+              className="absolute top-4 right-4 text-cream-faint hover:text-cream p-1 rounded-lg hover:bg-[rgba(43,34,26,0.06)]"
               title="Close"
             >
               <X className="h-4 w-4" />
@@ -658,7 +658,7 @@ export function CreativeView({
                 className="absolute inset-0 pointer-events-none"
                 style={{
                   background:
-                    "radial-gradient(58% 60% at 50% 44%, rgba(196,99,58,0.22), rgba(111,191,148,0.07) 55%, transparent 78%)",
+                    "radial-gradient(58% 60% at 50% 44%, rgba(196,99,58,0.22), rgba(63,146,104,0.07) 55%, transparent 78%)",
                 }}
               />
               <InstagramFrame
@@ -700,7 +700,7 @@ export function CreativeView({
               </div>
               <button
                 onClick={closeRefine}
-                className="text-cream-faint hover:text-cream p-1 rounded-lg hover:bg-[rgba(244,237,227,0.06)] shrink-0"
+                className="text-cream-faint hover:text-cream p-1 rounded-lg hover:bg-[rgba(43,34,26,0.06)] shrink-0"
                 title="Close"
               >
                 <X className="h-4 w-4" />
@@ -905,8 +905,8 @@ function BrandLibrary({ items }: { items: Asset[] }) {
             className={cn(
               "rounded-xl border border-dashed px-4 py-6 text-center cursor-pointer transition-colors",
               dragOver
-                ? "border-[rgba(111,191,148,0.6)] bg-[rgba(111,191,148,0.06)]"
-                : "border-line-strong hover:border-[rgba(244,237,227,0.3)] hover:bg-[rgba(244,237,227,0.02)]"
+                ? "border-[rgba(63,146,104,0.6)] bg-[rgba(63,146,104,0.06)]"
+                : "border-line-strong hover:border-[rgba(43,34,26,0.3)] hover:bg-[rgba(43,34,26,0.02)]"
             )}
           >
             <ImagePlus className="h-5 w-5 mx-auto text-cream-faint" />
@@ -923,7 +923,7 @@ function BrandLibrary({ items }: { items: Asset[] }) {
 
           {/* inline details form once a file is chosen */}
           {file && (
-            <div className="mt-3 flex flex-wrap items-center gap-2.5 rounded-xl border border-line bg-[rgba(244,237,227,0.03)] p-3">
+            <div className="mt-3 flex flex-wrap items-center gap-2.5 rounded-xl border border-line bg-[rgba(43,34,26,0.03)] p-3">
               {preview && (
                 // eslint-disable-next-line @next/next/no-img-element
                 <img
@@ -1019,7 +1019,7 @@ function AssetCard({
   // caption expansion — declared before the kind branches so hooks stay unconditional
   const [showAllCaption, setShowAllCaption] = React.useState(false);
   const statusClasses = cn(
-    asset.status === "selected" && "ring-2 ring-[rgba(90,212,142,0.5)]",
+    asset.status === "selected" && "ring-2 ring-[rgba(47,158,99,0.5)]",
     asset.status === "rejected" && "opacity-40"
   );
 
@@ -1136,7 +1136,7 @@ function AssetCard({
               {tags.map((t) => (
                 <span
                   key={t}
-                  className="rounded-full border border-line bg-[rgba(244,237,227,0.04)] px-2 py-0.5 text-[10px] text-info"
+                  className="rounded-full border border-line bg-[rgba(43,34,26,0.04)] px-2 py-0.5 text-[10px] text-info"
                 >
                   {t.startsWith("#") ? t : `#${t}`}
                 </span>

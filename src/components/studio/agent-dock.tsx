@@ -130,14 +130,14 @@ export function AgentDock() {
               <span className={cn(
                 "text-[9px] uppercase tracking-wider px-1.5 py-0.5 rounded-full border",
                 state.status === "awaiting_approval"
-                  ? "text-amber border-[rgba(232,160,98,0.4)] bg-[rgba(196,99,58,0.1)]"
+                  ? "text-amber border-[rgba(201,127,61,0.4)] bg-[rgba(196,99,58,0.1)]"
                   : state.status === "completed"
-                    ? "text-good border-[rgba(90,212,142,0.3)]"
-                    : "text-eucalyptus border-[rgba(111,191,148,0.3)]"
+                    ? "text-good border-[rgba(47,158,99,0.3)]"
+                    : "text-eucalyptus border-[rgba(63,146,104,0.3)]"
               )}>
                 {state.status === "idle" ? "connecting" : state.status.replaceAll("_", " ")}
               </span>
-              <button onClick={collapse} className="ml-auto p-1 text-cream-faint hover:text-cream rounded-lg hover:bg-[rgba(244,237,227,0.06)]">
+              <button onClick={collapse} className="ml-auto p-1 text-cream-faint hover:text-cream rounded-lg hover:bg-[rgba(43,34,26,0.06)]">
                 <ChevronDown className="h-4 w-4" />
               </button>
             </div>
@@ -169,7 +169,7 @@ export function AgentDock() {
             </span>
             <span className="flex gap-1">
               {runs.slice(0, 3).map((r) => (
-                <span key={r.id} className="rounded-full bg-[rgba(244,237,227,0.07)] border border-line px-2 py-0.5 text-[9px] uppercase tracking-wider text-cream-muted">
+                <span key={r.id} className="rounded-full bg-[rgba(43,34,26,0.07)] border border-line px-2 py-0.5 text-[9px] uppercase tracking-wider text-cream-muted">
                   {r.workflow}
                 </span>
               ))}
@@ -178,7 +178,7 @@ export function AgentDock() {
               role="button"
               tabIndex={0}
               onClick={(e) => { e.stopPropagation(); setDismissed(true); }}
-              className="p-1 rounded-full text-cream-faint hover:text-cream hover:bg-[rgba(244,237,227,0.08)]"
+              className="p-1 rounded-full text-cream-faint hover:text-cream hover:bg-[rgba(43,34,26,0.08)]"
             >
               <X className="h-3 w-3" />
             </span>

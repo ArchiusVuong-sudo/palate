@@ -75,7 +75,7 @@ export function OutboxView({ emails }: { emails: OutboxEmail[] }) {
                     {email.to_emails.map((addr) => (
                       <span
                         key={addr}
-                        className="font-mono text-[10.5px] text-cream-muted rounded-full border border-line bg-[rgba(244,237,227,0.04)] px-2.5 py-0.5"
+                        className="font-mono text-[10.5px] text-cream-muted rounded-full border border-line bg-[rgba(43,34,26,0.04)] px-2.5 py-0.5"
                       >
                         {addr}
                       </span>
@@ -99,7 +99,7 @@ export function OutboxView({ emails }: { emails: OutboxEmail[] }) {
                   {open.to_emails.map((addr) => (
                     <span
                       key={addr}
-                      className="font-mono text-[10.5px] text-cream-muted rounded-full border border-line bg-[rgba(244,237,227,0.04)] px-2.5 py-0.5"
+                      className="font-mono text-[10.5px] text-cream-muted rounded-full border border-line bg-[rgba(43,34,26,0.04)] px-2.5 py-0.5"
                     >
                       {addr}
                     </span>

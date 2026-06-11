@@ -44,7 +44,7 @@ export default function LandingPage() {
 
 function Nav() {
   return (
-    <header className="sticky top-0 z-40 border-b border-line bg-[rgba(11,14,12,0.72)] backdrop-blur-xl">
+    <header className="sticky top-0 z-40 border-b border-line bg-[rgba(255,253,248,0.72)] backdrop-blur-xl">
       <div className="max-w-6xl mx-auto px-6 h-16 flex items-center gap-3">
         <Link href="/" className="flex items-center gap-2.5">
           <LogoMark />
@@ -53,7 +53,7 @@ function Nav() {
         <div className="ml-auto flex items-center gap-2">
           <a
             href="#workflow"
-            className="hidden sm:inline-flex items-center h-9 px-3.5 rounded-xl text-xs font-medium text-cream-muted hover:text-cream hover:bg-[rgba(244,237,227,0.06)] transition-all"
+            className="hidden sm:inline-flex items-center h-9 px-3.5 rounded-xl text-xs font-medium text-cream-muted hover:text-cream hover:bg-[rgba(43,34,26,0.06)] transition-all"
           >
             The workflow
           </a>
@@ -81,9 +81,9 @@ function CtaLink({
         "inline-flex items-center justify-center gap-2 rounded-xl font-medium transition-all duration-200 select-none",
         size === "md" ? "h-9.5 px-4 text-sm" : "h-11 px-6 text-sm",
         variant === "primary" &&
-          "bg-gradient-to-b from-[#d4744a] to-terracotta text-[#1a0f08] shadow-[0_8px_24px_-10px_rgba(196,99,58,0.7),inset_0_1px_0_rgba(255,255,255,0.25)] hover:brightness-110 active:scale-[0.98]",
+          "bg-gradient-to-b from-[#d4744a] to-terracotta text-white shadow-[0_8px_24px_-10px_rgba(196,99,58,0.7),inset_0_1px_0_rgba(255,255,255,0.25)] hover:brightness-110 active:scale-[0.98]",
         variant === "outline" &&
-          "border border-line-strong text-cream hover:bg-[rgba(244,237,227,0.05)] hover:border-[rgba(244,237,227,0.3)]",
+          "border border-line-strong text-cream hover:bg-[rgba(43,34,26,0.05)] hover:border-[rgba(43,34,26,0.3)]",
         className
       )}
     >
@@ -195,12 +195,12 @@ function AgentAtWork() {
 
       <div className="relative glass rounded-2xl overflow-hidden">
         {/* window chrome */}
-        <div className="flex items-center gap-2 px-4 h-11 border-b border-line bg-[rgba(244,237,227,0.02)]">
+        <div className="flex items-center gap-2 px-4 h-11 border-b border-line bg-[rgba(43,34,26,0.02)]">
           <span className="h-2.5 w-2.5 rounded-full bg-terracotta/70" />
           <span className="h-2.5 w-2.5 rounded-full bg-amber/60" />
           <span className="h-2.5 w-2.5 rounded-full bg-eucalyptus/60" />
           <span className="ml-2 font-mono text-[10px] text-cream-faint">palate · morning sweep — Marlow &amp; Sage</span>
-          <span className="ml-auto inline-flex items-center gap-1.5 rounded-full px-2.5 py-0.5 text-[10px] font-medium border bg-[rgba(111,191,148,0.1)] text-eucalyptus border-[rgba(111,191,148,0.25)]">
+          <span className="ml-auto inline-flex items-center gap-1.5 rounded-full px-2.5 py-0.5 text-[10px] font-medium border bg-[rgba(63,146,104,0.1)] text-eucalyptus border-[rgba(63,146,104,0.25)]">
             <span className="dot bg-eucalyptus dot-pulse" /> live
           </span>
         </div>
@@ -216,7 +216,7 @@ function AgentAtWork() {
           <MockToolRow icon={Sparkles} label="Saving insight" result="Pavlova selling out by 8pm — mentions up 5×" mono="save_insight" />
 
           {/* tiny chart */}
-          <motion.div variants={panelItem} className="rounded-xl border border-line/70 bg-[rgba(244,237,227,0.025)] p-3">
+          <motion.div variants={panelItem} className="rounded-xl border border-line/70 bg-[rgba(43,34,26,0.025)] p-3">
             <div className="flex items-center gap-2 mb-2.5">
               <BarChart3 className="h-3.5 w-3.5 text-cream-muted" />
               <span className="text-[11px] text-cream-muted">Sentiment by day</span>
@@ -243,14 +243,14 @@ function AgentAtWork() {
           </motion.div>
 
           {/* in-flight tool row */}
-          <motion.div variants={panelItem} className="rounded-xl border border-line/70 bg-[rgba(244,237,227,0.025)] px-3 py-2">
+          <motion.div variants={panelItem} className="rounded-xl border border-line/70 bg-[rgba(43,34,26,0.025)] px-3 py-2">
             <div className="flex items-center gap-2.5">
               <CircleDashed className="h-3.5 w-3.5 text-amber animate-spin shrink-0" style={{ animationDuration: "2.4s" }} />
               <ImageIcon className="h-3.5 w-3.5 text-cream-muted shrink-0" />
               <span className="text-xs text-cream">Generating image — story 9:16</span>
               <span className="ml-auto font-mono text-[10px] text-cream-faint">generate_image</span>
             </div>
-            <div className="mt-2 h-1 rounded-full bg-[rgba(244,237,227,0.07)] overflow-hidden">
+            <div className="mt-2 h-1 rounded-full bg-[rgba(43,34,26,0.07)] overflow-hidden">
               <motion.div
                 initial={{ width: "8%" }}
                 animate={{ width: "68%" }}
@@ -263,7 +263,7 @@ function AgentAtWork() {
           {/* approval chip */}
           <motion.div
             variants={panelItem}
-            className="rounded-2xl border border-[rgba(232,160,98,0.4)] bg-[rgba(196,99,58,0.06)] accent-ring p-3.5"
+            className="rounded-2xl border border-[rgba(201,127,61,0.4)] bg-[rgba(196,99,58,0.06)] accent-ring p-3.5"
           >
             <div className="flex items-center gap-2 mb-1.5">
               <MessageSquareWarning className="h-4 w-4 text-amber" />
@@ -274,7 +274,7 @@ function AgentAtWork() {
               Schedule the pavlova scarcity story for 7:30pm tonight?
             </p>
             <div className="mt-2.5 flex items-center gap-2">
-              <span className="inline-flex items-center justify-center h-8 px-3 rounded-xl text-xs font-medium bg-gradient-to-b from-[#d4744a] to-terracotta text-[#1a0f08] shadow-[0_8px_24px_-10px_rgba(196,99,58,0.7),inset_0_1px_0_rgba(255,255,255,0.25)]">
+              <span className="inline-flex items-center justify-center h-8 px-3 rounded-xl text-xs font-medium bg-gradient-to-b from-[#d4744a] to-terracotta text-white shadow-[0_8px_24px_-10px_rgba(196,99,58,0.7),inset_0_1px_0_rgba(255,255,255,0.25)]">
                 Approve
               </span>
               <span className="inline-flex items-center justify-center h-8 px-3 rounded-xl text-xs font-medium border border-line-strong text-cream">
@@ -307,7 +307,7 @@ function MockToolRow({
   return (
     <motion.div
       variants={panelItem}
-      className="rounded-xl border border-line/70 bg-[rgba(244,237,227,0.025)] px-3 py-2 flex items-center gap-2.5"
+      className="rounded-xl border border-line/70 bg-[rgba(43,34,26,0.025)] px-3 py-2 flex items-center gap-2.5"
     >
       <CheckCircle2 className="h-3.5 w-3.5 text-good shrink-0" />
       <Icon className="h-3.5 w-3.5 text-cream-muted shrink-0" />
@@ -324,22 +324,22 @@ const STEPS = [
   {
     n: "01", title: "Listen", icon: Ear,
     copy: "Reads every review, comment and mention overnight",
-    iconCls: "text-info", tint: "rgba(127,181,214,0.12)", ring: "rgba(127,181,214,0.3)",
+    iconCls: "text-info", tint: "rgba(79,135,173,0.12)", ring: "rgba(79,135,173,0.3)",
   },
   {
     n: "02", title: "Brief", icon: FileText,
     copy: "Turns insight into a designer-ready brief",
-    iconCls: "text-amber", tint: "rgba(232,160,98,0.12)", ring: "rgba(232,160,98,0.3)",
+    iconCls: "text-amber", tint: "rgba(201,127,61,0.12)", ring: "rgba(201,127,61,0.3)",
   },
   {
     n: "03", title: "Create", icon: Palette,
     copy: "Generates on-brand stories, posts and video variants",
-    iconCls: "text-eucalyptus", tint: "rgba(111,191,148,0.12)", ring: "rgba(111,191,148,0.3)",
+    iconCls: "text-eucalyptus", tint: "rgba(63,146,104,0.12)", ring: "rgba(63,146,104,0.3)",
   },
   {
     n: "04", title: "Guard", icon: ShieldCheck,
     copy: "Scores everything against your brand contract before you approve",
-    iconCls: "text-warn", tint: "rgba(232,185,79,0.12)", ring: "rgba(232,185,79,0.3)",
+    iconCls: "text-warn", tint: "rgba(185,138,35,0.12)", ring: "rgba(185,138,35,0.3)",
   },
 ];
 
@@ -361,7 +361,7 @@ function Workflow() {
           {/* connecting line */}
           <div
             aria-hidden
-            className="hidden md:block absolute top-[52px] left-[8%] right-[8%] h-px bg-gradient-to-r from-transparent via-[rgba(244,237,227,0.18)] to-transparent"
+            className="hidden md:block absolute top-[52px] left-[8%] right-[8%] h-px bg-gradient-to-r from-transparent via-[rgba(43,34,26,0.18)] to-transparent"
           />
           <div className="grid md:grid-cols-4 gap-5">
             {STEPS.map((s, i) => (
@@ -478,7 +478,7 @@ function ApprovalVisual() {
         className="absolute -inset-6 rounded-[32px] blur-2xl opacity-25 pointer-events-none"
         style={{ background: "radial-gradient(ellipse at 50% 30%, rgba(196,99,58,0.35), transparent 70%)" }}
       />
-      <div className="relative rounded-2xl border border-[rgba(232,160,98,0.4)] bg-[rgba(196,99,58,0.06)] accent-ring p-4 sm:p-5">
+      <div className="relative rounded-2xl border border-[rgba(201,127,61,0.4)] bg-[rgba(196,99,58,0.06)] accent-ring p-4 sm:p-5">
         <div className="flex items-center gap-2 mb-2">
           <MessageSquareWarning className="h-4 w-4 text-amber" />
           <span className="text-[11px] uppercase tracking-[0.14em] text-cream-faint">agent needs your decision</span>
@@ -491,17 +491,17 @@ function ApprovalVisual() {
           <p><span className="text-cream-faint">caption: </span><span className="text-cream-muted">Last call for the miso caramel pav — it sold out by 8 last night…</span></p>
           <p><span className="text-cream-faint">channel: </span><span className="text-cream-muted">Instagram story · Surry Hills</span></p>
         </div>
-        <div className="mt-3 h-8 rounded-lg bg-[rgba(0,0,0,0.25)] border border-line px-2.5 flex items-center text-xs text-cream-faint">
+        <div className="mt-3 h-8 rounded-lg bg-[rgba(43,34,26,0.04)] border border-line px-2.5 flex items-center text-xs text-cream-faint">
           Optional note for the agent (it learns from this)…
         </div>
         <div className="mt-2.5 flex gap-2">
-          <span className="inline-flex items-center justify-center h-8 px-3 rounded-xl text-xs font-medium bg-gradient-to-b from-[#d4744a] to-terracotta text-[#1a0f08] shadow-[0_8px_24px_-10px_rgba(196,99,58,0.7),inset_0_1px_0_rgba(255,255,255,0.25)]">
+          <span className="inline-flex items-center justify-center h-8 px-3 rounded-xl text-xs font-medium bg-gradient-to-b from-[#d4744a] to-terracotta text-white shadow-[0_8px_24px_-10px_rgba(196,99,58,0.7),inset_0_1px_0_rgba(255,255,255,0.25)]">
             approve
           </span>
           <span className="inline-flex items-center justify-center h-8 px-3 rounded-xl text-xs font-medium border border-line-strong text-cream">
             request changes
           </span>
-          <span className="inline-flex items-center justify-center h-8 px-3 rounded-xl text-xs font-medium border border-[rgba(239,116,102,0.3)] bg-[rgba(239,116,102,0.14)] text-bad">
+          <span className="inline-flex items-center justify-center h-8 px-3 rounded-xl text-xs font-medium border border-[rgba(207,75,59,0.3)] bg-[rgba(207,75,59,0.14)] text-bad">
             reject
           </span>
         </div>
@@ -532,8 +532,8 @@ function MemoryVisual() {
             className={cn(
               "flex items-center gap-2.5 rounded-xl border px-3 py-2",
               r.hot
-                ? "border-[rgba(111,191,148,0.35)] bg-[rgba(111,191,148,0.07)]"
-                : "border-line/70 bg-[rgba(244,237,227,0.02)]"
+                ? "border-[rgba(63,146,104,0.35)] bg-[rgba(63,146,104,0.07)]"
+                : "border-line/70 bg-[rgba(43,34,26,0.02)]"
             )}
           >
             <FileText className={cn("h-3.5 w-3.5 shrink-0", r.hot ? "text-eucalyptus" : "text-cream-faint")} />
@@ -543,8 +543,8 @@ function MemoryVisual() {
               className={cn(
                 "inline-flex items-center rounded-full px-2 py-0.5 text-[9.5px] font-medium border",
                 r.by === "agent"
-                  ? "bg-[rgba(111,191,148,0.1)] text-eucalyptus border-[rgba(111,191,148,0.25)]"
-                  : "bg-[rgba(244,237,227,0.06)] text-cream-muted border-line"
+                  ? "bg-[rgba(63,146,104,0.1)] text-eucalyptus border-[rgba(63,146,104,0.25)]"
+                  : "bg-[rgba(43,34,26,0.06)] text-cream-muted border-line"
               )}
             >
               {r.by}
@@ -552,7 +552,7 @@ function MemoryVisual() {
           </div>
         ))}
       </div>
-      <div className="mt-3 rounded-xl border border-line bg-[rgba(0,0,0,0.3)] p-3 font-mono text-[11px] leading-relaxed">
+      <div className="mt-3 rounded-xl border border-line bg-[rgba(43,34,26,0.05)] p-3 font-mono text-[11px] leading-relaxed">
         <p className="text-cream-faint">learnings/feedback-log.md · v6 → v7</p>
         <p className="text-good mt-1">+ Never crop the pavlova — the toffee shard is the hero.</p>
         <p className="text-cream-faint mt-1">recorded after a &ldquo;request changes&rdquo; decision</p>
@@ -576,7 +576,7 @@ function EvidenceVisual() {
             <div
               aria-hidden
               className="absolute -top-8 -right-8 h-20 w-20 rounded-full blur-2xl opacity-25 pointer-events-none"
-              style={{ background: m.bad ? "#ef7466" : "#5ad48e" }}
+              style={{ background: m.bad ? "#cf4b3b" : "#2f9e63" }}
             />
             <p className="text-[9.5px] uppercase tracking-[0.14em] text-cream-faint">{m.label}</p>
             <p className="mt-1.5 font-mono text-xl text-cream tabular-nums">{m.value}</p>

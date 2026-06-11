@@ -4,7 +4,7 @@
  * fireConfetti — tiny dependency-free celebration burst using the Web
  * Animations API. Call from any event handler with the click coordinates.
  */
-const COLORS = ["#e8a062", "#6fbf94", "#c4633a", "#e8b94f", "#f4ede3", "#7fb5d6"];
+const COLORS = ["#e8a062", "#6fbf94", "#c4633a", "#b98a23", "#d97a3f", "#4f87ad"];
 
 export function fireConfetti(x?: number, y?: number) {
   if (typeof window === "undefined") return;

@@ -134,7 +134,7 @@ export function CopilotPanel({
                 <button
                   key={s}
                   onClick={() => send(s)}
-                  className="text-left text-xs text-cream-muted rounded-xl border border-line px-3 py-2.5 hover:border-line-strong hover:text-cream hover:bg-[rgba(244,237,227,0.03)] transition-colors"
+                  className="text-left text-xs text-cream-muted rounded-xl border border-line px-3 py-2.5 hover:border-line-strong hover:text-cream hover:bg-[rgba(43,34,26,0.03)] transition-colors"
                 >
                   {s}
                 </button>
@@ -158,7 +158,7 @@ export function CopilotPanel({
         )}
 
         {activePrompt && (
-          <div className="border-l-2 border-[rgba(111,191,148,0.4)] pl-3">
+          <div className="border-l-2 border-[rgba(63,146,104,0.4)] pl-3">
             <RunConsole state={state} onDecide={decide} dense />
           </div>
         )}
@@ -166,7 +166,7 @@ export function CopilotPanel({
 
       <div className="p-3 border-t border-line shrink-0">
         <div className={cn(
-          "flex items-end gap-2 rounded-2xl border bg-[rgba(244,237,227,0.04)] p-2 transition-colors",
+          "flex items-end gap-2 rounded-2xl border bg-[rgba(43,34,26,0.04)] p-2 transition-colors",
           busy ? "border-line" : "border-line-strong focus-within:border-[rgba(196,99,58,0.55)]"
         )}>
           <textarea

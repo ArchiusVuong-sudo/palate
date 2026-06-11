@@ -71,7 +71,7 @@ function Chip({ children, className }: { children: React.ReactNode; className?: 
   return (
     <span
       className={cn(
-        "inline-flex items-center gap-1 rounded-full border border-line bg-[rgba(244,237,227,0.03)] px-2 py-0.5 text-[10px] text-cream-muted",
+        "inline-flex items-center gap-1 rounded-full border border-line bg-[rgba(43,34,26,0.03)] px-2 py-0.5 text-[10px] text-cream-muted",
         className
       )}
     >
@@ -263,7 +263,7 @@ export function BriefsView({
                   type="button"
                   onClick={() => setShowFullBrief((v) => !v)}
                   aria-expanded={showFullBrief}
-                  className="mt-4 inline-flex items-center gap-1.5 rounded-full border border-line bg-[rgba(244,237,227,0.06)] px-2.5 py-0.5 text-[11px] font-medium tracking-wide text-cream-muted hover:text-cream hover:border-line-strong transition-colors"
+                  className="mt-4 inline-flex items-center gap-1.5 rounded-full border border-line bg-[rgba(43,34,26,0.06)] px-2.5 py-0.5 text-[11px] font-medium tracking-wide text-cream-muted hover:text-cream hover:border-line-strong transition-colors"
                 >
                   Full brief
                   <ChevronDown className={cn("h-3 w-3 transition-transform", showFullBrief && "rotate-180")} />
@@ -396,7 +396,7 @@ export function BriefsView({
                 initial={{ opacity: 0, y: 8 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: Math.min(i * 0.05, 0.4) }}
-                className="flex items-center gap-3 rounded-xl border border-line bg-[rgba(244,237,227,0.02)] px-3.5 py-2.5"
+                className="flex items-center gap-3 rounded-xl border border-line bg-[rgba(43,34,26,0.02)] px-3.5 py-2.5"
               >
                 <Badge tone={severityTone(ins.severity)}>{ins.severity}</Badge>
                 <p className="text-xs text-cream truncate flex-1">{ins.title}</p>
@@ -434,7 +434,7 @@ export function BriefsView({
               </div>
               <button
                 onClick={() => setExpanded(null)}
-                className="text-cream-faint hover:text-cream p-1 rounded-lg hover:bg-[rgba(244,237,227,0.06)] shrink-0"
+                className="text-cream-faint hover:text-cream p-1 rounded-lg hover:bg-[rgba(43,34,26,0.06)] shrink-0"
                 title="Close"
               >
                 <X className="h-4 w-4" />

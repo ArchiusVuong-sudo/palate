@@ -88,16 +88,16 @@ function criterionScore(scores: Review["scores"], key: string): { score: number;
 
 const barGradient = (score: number) =>
   score >= 75
-    ? "linear-gradient(90deg, rgba(90,212,142,0.45), #5ad48e)"
+    ? "linear-gradient(90deg, rgba(47,158,99,0.45), #2f9e63)"
     : score >= 50
-      ? "linear-gradient(90deg, rgba(232,185,79,0.45), #e8b94f)"
-      : "linear-gradient(90deg, rgba(239,116,102,0.45), #ef7466)";
+      ? "linear-gradient(90deg, rgba(185,138,35,0.45), #b98a23)"
+      : "linear-gradient(90deg, rgba(207,75,59,0.45), #cf4b3b)";
 
 const COLUMNS: { key: string; label: string; dot: string; match: (status: string) => boolean }[] = [
   { key: "in_review", label: "In review", dot: "#e8a062", match: (s) => s === "draft" || s === "in_review" },
-  { key: "changes", label: "Changes requested", dot: "#e8b94f", match: (s) => s === "changes_requested" },
-  { key: "approved", label: "Approved", dot: "#5ad48e", match: (s) => s === "approved" },
-  { key: "shipped", label: "Scheduled & published", dot: "#7fb5d6", match: (s) => s === "scheduled" || s === "published" },
+  { key: "changes", label: "Changes requested", dot: "#b98a23", match: (s) => s === "changes_requested" },
+  { key: "approved", label: "Approved", dot: "#2f9e63", match: (s) => s === "approved" },
+  { key: "shipped", label: "Scheduled & published", dot: "#4f87ad", match: (s) => s === "scheduled" || s === "published" },
 ];
 
 /** Column key → post status applied when a card is dropped there. */
@@ -469,8 +469,8 @@ function PhonePreview({ post, media }: { post: Post; media?: Asset }) {
     <div className="relative overflow-hidden px-6 py-10">
       {/* soft radial glow behind the phone */}
       <div className="pointer-events-none absolute -top-16 -left-12 h-64 w-64 rounded-full bg-[rgba(196,99,58,0.22)] blur-3xl" />
-      <div className="pointer-events-none absolute -bottom-20 -right-10 h-72 w-72 rounded-full bg-[rgba(111,191,148,0.16)] blur-3xl" />
-      <div className="pointer-events-none absolute top-1/3 left-1/2 -translate-x-1/2 h-56 w-56 rounded-full bg-[rgba(232,160,98,0.12)] blur-3xl" />
+      <div className="pointer-events-none absolute -bottom-20 -right-10 h-72 w-72 rounded-full bg-[rgba(63,146,104,0.16)] blur-3xl" />
+      <div className="pointer-events-none absolute top-1/3 left-1/2 -translate-x-1/2 h-56 w-56 rounded-full bg-[rgba(201,127,61,0.12)] blur-3xl" />
 
       <div className="relative flex flex-col items-center gap-4">
         <div className="flex items-center gap-2">
@@ -518,7 +518,7 @@ function ApprovalRow({
       initial={{ opacity: 0, y: 8 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ delay: index * 0.06 }}
-      className="rounded-xl border border-[rgba(232,160,98,0.28)] bg-[rgba(196,99,58,0.05)] p-3.5"
+      className="rounded-xl border border-[rgba(201,127,61,0.28)] bg-[rgba(196,99,58,0.05)] p-3.5"
     >
       <div className="flex items-start gap-2 flex-wrap">
         <p className="text-sm text-cream leading-relaxed flex-1 min-w-[200px]">{approval.question}</p>
@@ -605,7 +605,7 @@ function PostHoverContent({ post, review }: { post: Post; review?: Review }) {
           {post.hashtags.map((h) => (
             <span
               key={h}
-              className="rounded-full border border-line bg-[rgba(244,237,227,0.04)] px-2 py-0.5 font-mono text-[10px] text-info"
+              className="rounded-full border border-line bg-[rgba(43,34,26,0.04)] px-2 py-0.5 font-mono text-[10px] text-info"
             >
               #{h.replace(/^#/, "")}
             </span>
@@ -617,7 +617,7 @@ function PostHoverContent({ post, review }: { post: Post; review?: Review }) {
           {rows.map((r) => (
             <div key={r.key} className="flex items-center gap-2">
               <span className="w-[6.5rem] shrink-0 text-[10px] text-cream-muted">{r.label}</span>
-              <div className="h-1 flex-1 overflow-hidden rounded-full bg-[rgba(244,237,227,0.08)]">
+              <div className="h-1 flex-1 overflow-hidden rounded-full bg-[rgba(43,34,26,0.08)]">
                 <div
                   className="h-full rounded-full"
                   style={{ width: `${r.score}%`, background: barGradient(r.score) }}
@@ -790,7 +790,7 @@ function ReviewCard({
                   return (
                     <div key={r.key} className="flex items-center gap-2.5" title={r.note}>
                       <span className="w-[7.5rem] shrink-0 text-[11px] text-cream-muted">{r.label}</span>
-                      <div className="flex-1 h-1.5 rounded-full bg-[rgba(244,237,227,0.08)] overflow-hidden">
+                      <div className="flex-1 h-1.5 rounded-full bg-[rgba(43,34,26,0.08)] overflow-hidden">
                         <motion.div
                           className="h-full rounded-full"
                           style={{ background: barGradient(score) }}
@@ -841,7 +841,7 @@ function ReviewCard({
               <img
                 src={review.annotated_image_url}
                 alt="Agent-annotated review image"
-                className="w-full rounded-xl border border-[rgba(239,116,102,0.35)]"
+                className="w-full rounded-xl border border-[rgba(207,75,59,0.35)]"
                 loading="lazy"
                 decoding="async"
               />

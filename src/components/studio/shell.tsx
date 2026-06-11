@@ -97,7 +97,7 @@ export function StudioShell({
   return (
     <div className="flex h-screen overflow-hidden relative z-10">
       {/* ───── sidebar ───── */}
-      <aside className="w-56 shrink-0 border-r border-line flex flex-col bg-[rgba(11,14,12,0.6)] backdrop-blur-xl">
+      <aside className="w-56 shrink-0 border-r border-line flex flex-col bg-[rgba(255,253,248,0.6)] backdrop-blur-xl">
         <Link href="/" className="flex items-center gap-2.5 px-5 h-16 border-b border-line">
           <LogoMark />
           <div>
@@ -121,14 +121,14 @@ export function StudioShell({
                   "group flex items-center gap-2.5 rounded-xl px-3 py-2 text-[13px] transition-all relative",
                   active
                     ? "text-cream bg-[rgba(196,99,58,0.13)] border border-[rgba(196,99,58,0.25)]"
-                    : "text-cream-muted border border-transparent hover:text-cream hover:bg-[rgba(244,237,227,0.04)]"
+                    : "text-cream-muted border border-transparent hover:text-cream hover:bg-[rgba(43,34,26,0.04)]"
                 )}
               >
                 <item.icon className={cn("h-4 w-4", active ? "text-amber" : "text-cream-faint group-hover:text-cream-muted")} />
                 {item.label}
                 <span className="ml-auto flex items-center gap-1.5">
                   {badge !== undefined && badge > 0 && (
-                    <span className="rounded-full bg-[rgba(196,99,58,0.85)] text-[#1a0f08] text-[10px] font-semibold h-4.5 min-w-4.5 px-1 inline-flex items-center justify-center">
+                    <span className="rounded-full bg-[rgba(196,99,58,0.85)] text-white text-[10px] font-semibold h-4.5 min-w-4.5 px-1 inline-flex items-center justify-center">
                       {badge}
                     </span>
                   )}
@@ -149,7 +149,7 @@ export function StudioShell({
 
       {/* ───── main ───── */}
       <main className="flex-1 min-w-0 flex flex-col">
-        <header className="h-16 shrink-0 border-b border-line flex items-center px-6 gap-3 bg-[rgba(11,14,12,0.5)] backdrop-blur-xl">
+        <header className="h-16 shrink-0 border-b border-line flex items-center px-6 gap-3 bg-[rgba(255,253,248,0.5)] backdrop-blur-xl">
           <Breadcrumb pathname={pathname} />
           <div className="ml-auto flex items-center gap-2">
             <button
@@ -165,8 +165,8 @@ export function StudioShell({
               className={cn(
                 "inline-flex items-center gap-2 rounded-xl px-3.5 h-9 text-xs font-medium border transition-all",
                 copilotOpen
-                  ? "border-[rgba(111,191,148,0.35)] bg-[rgba(111,191,148,0.1)] text-eucalyptus"
-                  : "border-line-strong text-cream-muted hover:text-cream hover:border-[rgba(244,237,227,0.3)]"
+                  ? "border-[rgba(63,146,104,0.35)] bg-[rgba(63,146,104,0.1)] text-eucalyptus"
+                  : "border-line-strong text-cream-muted hover:text-cream hover:border-[rgba(43,34,26,0.3)]"
               )}
             >
               <MessageCircle className="h-3.5 w-3.5" />
@@ -188,12 +188,12 @@ export function StudioShell({
             animate={{ width: 400, opacity: 1 }}
             exit={{ width: 0, opacity: 0 }}
             transition={{ duration: 0.32, ease: [0.21, 0.8, 0.32, 1] }}
-            className="shrink-0 border-l border-line bg-[rgba(13,17,14,0.7)] backdrop-blur-2xl overflow-hidden relative"
+            className="shrink-0 border-l border-line bg-[rgba(255,253,248,0.7)] backdrop-blur-2xl overflow-hidden relative"
           >
             <div className="w-[400px] h-full flex flex-col">
               <button
                 onClick={toggleCopilot}
-                className="absolute top-3 right-3 z-10 text-cream-faint hover:text-cream p-1 rounded-lg hover:bg-[rgba(244,237,227,0.06)]"
+                className="absolute top-3 right-3 z-10 text-cream-faint hover:text-cream p-1 rounded-lg hover:bg-[rgba(43,34,26,0.06)]"
                 title="Close copilot"
               >
                 <X className="h-4 w-4" />
@@ -227,7 +227,7 @@ export function LogoMark({ className }: { className?: string }) {
     <span className={cn("relative inline-flex h-8 w-8 items-center justify-center rounded-xl overflow-hidden", className)}
       style={{ background: "linear-gradient(135deg, #c4633a 0%, #e8a062 100%)" }}>
       <span className="absolute inset-0 opacity-30" style={{ background: "radial-gradient(circle at 70% 20%, white, transparent 50%)" }} />
-      <svg viewBox="0 0 24 24" className="h-4.5 w-4.5 relative" fill="none" stroke="#1a0f08" strokeWidth="2.2" strokeLinecap="round">
+      <svg viewBox="0 0 24 24" className="h-4.5 w-4.5 relative" fill="none" stroke="#fff6ec" strokeWidth="2.2" strokeLinecap="round">
         <path d="M12 3v7" />
         <path d="M8 3v4a4 4 0 0 0 8 0V3" />
         <path d="M12 10v11" />

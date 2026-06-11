@@ -174,7 +174,7 @@ export function ListeningView({
             <p className="text-[11px] uppercase tracking-[0.16em] text-cream-faint">The pulse — 14 days</p>
             <span className="flex items-center gap-3 text-[10px] text-cream-faint">
               <span className="inline-flex items-center gap-1.5"><span className="h-1.5 w-1.5 rounded-full bg-[#6fbf94]" /> positive</span>
-              <span className="inline-flex items-center gap-1.5"><span className="h-1.5 w-1.5 rounded-full bg-[#ef7466]" /> negative</span>
+              <span className="inline-flex items-center gap-1.5"><span className="h-1.5 w-1.5 rounded-full bg-[#cf4b3b]" /> negative</span>
             </span>
           </div>
           <div className="mt-1">
@@ -182,7 +182,7 @@ export function ListeningView({
               data={trendData}
               series={[
                 { key: "positive", name: "Positive", color: "#6fbf94" },
-                { key: "negative", name: "Negative", color: "#ef7466" },
+                { key: "negative", name: "Negative", color: "#cf4b3b" },
               ]}
               height={108}
               onPointClick={toggleDay}
@@ -365,7 +365,7 @@ function ActiveFilterChip({ name, value, onClear }: { name: string; value: strin
       type="button"
       onClick={onClear}
       title={`Remove ${name} filter`}
-      className="inline-flex h-7 items-center gap-1.5 rounded-full border border-[rgba(232,160,98,0.4)] bg-[rgba(232,160,98,0.12)] px-2.5 text-[11px] text-amber hover:bg-[rgba(232,160,98,0.2)] transition-colors"
+      className="inline-flex h-7 items-center gap-1.5 rounded-full border border-[rgba(201,127,61,0.4)] bg-[rgba(201,127,61,0.12)] px-2.5 text-[11px] text-amber hover:bg-[rgba(201,127,61,0.2)] transition-colors"
     >
       <span className="opacity-70">{name}:</span>
       <span className="max-w-40 truncate">{value}</span>
@@ -400,11 +400,11 @@ function FeedCard({
       initial={{ opacity: 0, y: 12 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ delay: Math.min(index, 8) * 0.05, duration: 0.4, ease: [0.21, 0.8, 0.32, 1] }}
-      style={item.is_flagged ? { borderColor: "rgba(239,116,102,0.4)" } : undefined}
+      style={item.is_flagged ? { borderColor: "rgba(207,75,59,0.4)" } : undefined}
       className="glass glass-hover rounded-2xl p-4"
     >
       <div className="flex items-start gap-3">
-        <div className="h-9 w-9 shrink-0 rounded-full border border-line bg-[rgba(244,237,227,0.06)] flex items-center justify-center text-[11px] font-medium text-cream-muted">
+        <div className="h-9 w-9 shrink-0 rounded-full border border-line bg-[rgba(43,34,26,0.06)] flex items-center justify-center text-[11px] font-medium text-cream-muted">
           {initials(item.author_name)}
         </div>
         <div className="min-w-0 flex-1">
@@ -451,7 +451,7 @@ function FeedCard({
             type="button"
             onClick={() => onDishClick(d)}
             title={`Filter the feed by dish "${d}"`}
-            className="rounded-full border border-[rgba(111,191,148,0.3)] bg-[rgba(111,191,148,0.07)] px-2 py-0.5 text-[10px] text-eucalyptus hover:bg-[rgba(111,191,148,0.16)] hover:border-[rgba(111,191,148,0.5)] transition-colors"
+            className="rounded-full border border-[rgba(63,146,104,0.3)] bg-[rgba(63,146,104,0.07)] px-2 py-0.5 text-[10px] text-eucalyptus hover:bg-[rgba(63,146,104,0.16)] hover:border-[rgba(63,146,104,0.5)] transition-colors"
           >
             {d}
           </button>
@@ -499,14 +499,14 @@ function FeedHoverCard({ item }: { item: SocialItem }) {
         <span className={cn("font-mono text-[10px] shrink-0", negative ? "text-bad" : "text-good")}>
           {score === null ? "—" : `${score >= 0 ? "+" : ""}${score.toFixed(2)}`}
         </span>
-        <span className="h-1 flex-1 rounded-full bg-[rgba(244,237,227,0.07)] overflow-hidden">
+        <span className="h-1 flex-1 rounded-full bg-[rgba(43,34,26,0.07)] overflow-hidden">
           <span
             className="block h-full rounded-full"
             style={{
               width: `${Math.round(Math.min(1, Math.abs(score ?? 0)) * 100)}%`,
               background: negative
-                ? "linear-gradient(90deg, rgba(239,116,102,0.3), #ef7466)"
-                : "linear-gradient(90deg, rgba(111,191,148,0.3), #6fbf94)",
+                ? "linear-gradient(90deg, rgba(207,75,59,0.3), #cf4b3b)"
+                : "linear-gradient(90deg, rgba(63,146,104,0.3), #6fbf94)",
             }}
           />
         </span>
@@ -522,7 +522,7 @@ function FeedHoverCard({ item }: { item: SocialItem }) {
           {dishes.map((d) => (
             <span
               key={d}
-              className="rounded-full border border-[rgba(111,191,148,0.3)] bg-[rgba(111,191,148,0.07)] px-1.5 py-px text-[9px] text-eucalyptus"
+              className="rounded-full border border-[rgba(63,146,104,0.3)] bg-[rgba(63,146,104,0.07)] px-1.5 py-px text-[9px] text-eucalyptus"
             >
               {d}
             </span>
@@ -563,7 +563,7 @@ function InsightHoverCard({ insight }: { insight: Insight }) {
           {metricEntries.map(([k, v]) => (
             <span
               key={k}
-              className="rounded-full border border-line bg-[rgba(244,237,227,0.03)] px-1.5 py-0.5 font-mono text-[9px] text-cream-faint"
+              className="rounded-full border border-line bg-[rgba(43,34,26,0.03)] px-1.5 py-0.5 font-mono text-[9px] text-cream-faint"
             >
               {k}: {metricValue(v)}
             </span>
@@ -577,9 +577,9 @@ function InsightHoverCard({ insight }: { insight: Insight }) {
 function CompactInsight({ insight, index }: { insight: Insight; index: number }) {
   const [open, setOpen] = React.useState(false);
   const severityColor =
-    insight.severity === "critical" ? "#ef7466"
-    : insight.severity === "warning" ? "#e8b94f"
-    : "rgba(244,237,227,0.16)";
+    insight.severity === "critical" ? "#cf4b3b"
+    : insight.severity === "warning" ? "#b98a23"
+    : "rgba(43,34,26,0.16)";
   const badgeTone = insight.severity === "critical" ? "bad" : insight.severity === "warning" ? "warn" : "info";
   const quotes = (insight.evidence ?? []).length;
 
@@ -604,12 +604,12 @@ function CompactInsight({ insight, index }: { insight: Insight; index: number })
       </p>
       <div className="mt-2 flex items-center gap-1.5 flex-wrap">
         {quotes > 0 && (
-          <span className="inline-flex items-center gap-1 rounded-full border border-line bg-[rgba(244,237,227,0.03)] px-2 py-0.5 text-[10px] text-cream-muted">
+          <span className="inline-flex items-center gap-1 rounded-full border border-line bg-[rgba(43,34,26,0.03)] px-2 py-0.5 text-[10px] text-cream-muted">
             <MessageSquareQuote className="h-3 w-3 text-cream-faint" />
             {quotes} quote{quotes === 1 ? "" : "s"}
           </span>
         )}
-        <span className="inline-flex items-center gap-1 rounded-full border border-line bg-[rgba(244,237,227,0.03)] px-2 py-0.5 text-[10px] text-cream-faint">
+        <span className="inline-flex items-center gap-1 rounded-full border border-line bg-[rgba(43,34,26,0.03)] px-2 py-0.5 text-[10px] text-cream-faint">
           {insight.status !== "new" && <CheckCircle2 className="h-3 w-3" />}
           {insight.status}
         </span>

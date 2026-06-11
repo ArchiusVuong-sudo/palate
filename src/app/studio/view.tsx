@@ -31,10 +31,10 @@ type NameValue = { name: string; value: number };
 type Dish = { name: string; value: number; avg_sentiment: number | null };
 
 const SOURCE_COLORS: Record<string, string> = {
-  google_reviews: "#e8b94f",
-  facebook: "#7fb5d6",
+  google_reviews: "#b98a23",
+  facebook: "#4f87ad",
   instagram: "#b58ad6",
-  gmail: "#ef7466",
+  gmail: "#cf4b3b",
 };
 
 const WORKFLOW_LABELS: Record<string, string> = {
@@ -99,7 +99,7 @@ export function OverviewView({
   const donutData = sources.map((s, i) => ({
     name: SOURCE_LABELS[s.name] ?? s.name,
     value: s.value,
-    color: SOURCE_COLORS[s.name] ?? ["#e8a062", "#6fbf94", "#7fb5d6", "#c4633a"][i % 4],
+    color: SOURCE_COLORS[s.name] ?? ["#e8a062", "#6fbf94", "#4f87ad", "#c4633a"][i % 4],
   }));
   const totalMentions = sources.reduce((a, b) => a + b.value, 0);
   const openInsights = insights.filter((i) => i.status === "new").length;
@@ -292,7 +292,7 @@ export function OverviewView({
               data={trendData}
               series={[
                 { key: "positive", name: "Positive", color: "#6fbf94" },
-                { key: "negative", name: "Negative", color: "#ef7466" },
+                { key: "negative", name: "Negative", color: "#cf4b3b" },
               ]}
               height={244}
               stacked={false}
@@ -338,7 +338,7 @@ export function OverviewView({
                       initial={{ opacity: 0, y: 12 }}
                       animate={{ opacity: 1, y: 0 }}
                       transition={{ delay: i * 0.06, duration: 0.4, ease: [0.21, 0.8, 0.32, 1] }}
-                      className="flex items-center gap-3 rounded-xl border border-line/60 bg-[rgba(244,237,227,0.02)] px-3 py-2.5"
+                      className="flex items-center gap-3 rounded-xl border border-line/60 bg-[rgba(43,34,26,0.02)] px-3 py-2.5"
                     >
                       <span className="font-mono text-[11px] text-cream-faint w-5 shrink-0">{String(i + 1).padStart(2, "0")}</span>
                       <span className="text-sm text-cream flex-1 min-w-0 truncate">{d.name}</span>
@@ -489,7 +489,7 @@ export function OverviewView({
                 <Link
                   key={run.id}
                   href="/studio/runs"
-                  className="flex items-center gap-3 rounded-xl px-2 py-2 hover:bg-[rgba(244,237,227,0.04)] transition-colors"
+                  className="flex items-center gap-3 rounded-xl px-2 py-2 hover:bg-[rgba(43,34,26,0.04)] transition-colors"
                 >
                   <span className="text-xs text-cream w-28 shrink-0">{WORKFLOW_LABELS[run.workflow] ?? run.workflow}</span>
                   <Badge tone={run.status === "completed" ? "good" : run.status === "failed" ? "bad" : run.status === "running" ? "info" : "neutral"}>
@@ -560,7 +560,7 @@ function InsightHoverCard({ insight }: { insight: Insight }) {
           {metricEntries.map(([k, v]) => (
             <span
               key={k}
-              className="rounded-full border border-line bg-[rgba(244,237,227,0.03)] px-1.5 py-0.5 font-mono text-[9px] text-cream-faint"
+              className="rounded-full border border-line bg-[rgba(43,34,26,0.03)] px-1.5 py-0.5 font-mono text-[9px] text-cream-faint"
             >
               {k}: {metricValue(v)}
             </span>
@@ -615,9 +615,9 @@ function InsightCard({
   onAcknowledge: () => void;
 }) {
   const severityColor =
-    insight.severity === "critical" ? "#ef7466"
-    : insight.severity === "warning" ? "#e8b94f"
-    : "rgba(244,237,227,0.16)";
+    insight.severity === "critical" ? "#cf4b3b"
+    : insight.severity === "warning" ? "#b98a23"
+    : "rgba(43,34,26,0.16)";
   const badgeTone = insight.severity === "critical" ? "bad" : insight.severity === "warning" ? "warn" : "info";
   const isOpen = insight.status === "new";
   const evidenceCount = (insight.evidence ?? []).length;
@@ -647,7 +647,7 @@ function InsightCard({
       {(evidenceCount > 0 || metricEntries.length > 0) && (
         <div className="mt-2.5 flex flex-wrap items-center gap-1.5">
           {evidenceCount > 0 && (
-            <span className="inline-flex items-center gap-1 rounded-full border border-line bg-[rgba(244,237,227,0.03)] px-2 py-0.5 text-[10px] text-cream-muted">
+            <span className="inline-flex items-center gap-1 rounded-full border border-line bg-[rgba(43,34,26,0.03)] px-2 py-0.5 text-[10px] text-cream-muted">
               <MessageSquareQuote className="h-3 w-3 text-cream-faint" />
               {evidenceCount} quote{evidenceCount === 1 ? "" : "s"}
             </span>
@@ -655,7 +655,7 @@ function InsightCard({
           {metricEntries.map(([k, v]) => (
             <span
               key={k}
-              className="rounded-full border border-line bg-[rgba(244,237,227,0.03)] px-2 py-0.5 font-mono text-[10px] text-cream-faint"
+              className="rounded-full border border-line bg-[rgba(43,34,26,0.03)] px-2 py-0.5 font-mono text-[10px] text-cream-faint"
             >
               {k}: {metricValue(v)}
             </span>

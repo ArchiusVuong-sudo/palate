@@ -120,7 +120,7 @@ export function HoverDetail({
                 transition={{ duration: 0.16, ease: [0.21, 0.8, 0.32, 1] }}
               >
                 <div
-                  className="glass rounded-2xl border-line-strong p-3.5 overflow-hidden shadow-[0_24px_70px_-24px_rgba(0,0,0,0.9)]"
+                  className="glass rounded-2xl border-line-strong p-3.5 overflow-hidden shadow-[0_24px_70px_-24px_rgba(43,34,26,0.3)]"
                   style={{ maxHeight: pos.maxH }}
                 >
                   {content}

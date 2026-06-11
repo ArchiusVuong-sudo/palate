@@ -197,7 +197,7 @@ export function KnowledgeView({ files }: { files: KnowledgeFile[] }) {
             </Card>
 
             {/* tip callout */}
-            <div className="glass rounded-2xl p-4" style={{ borderColor: "rgba(111,191,148,0.22)" }}>
+            <div className="glass rounded-2xl p-4" style={{ borderColor: "rgba(63,146,104,0.22)" }}>
               <div className="flex items-start gap-2.5">
                 <BookOpen className="h-4 w-4 text-eucalyptus shrink-0 mt-0.5" />
                 <p className="text-[11px] text-cream-muted leading-relaxed">
@@ -235,7 +235,7 @@ export function KnowledgeView({ files }: { files: KnowledgeFile[] }) {
 
                 <div className="p-4">
                   {preview ? (
-                    <div className="prose-palate min-h-[420px] max-h-[62vh] overflow-y-auto rounded-xl border border-line bg-[rgba(0,0,0,0.18)] px-4 py-3">
+                    <div className="prose-palate min-h-[420px] max-h-[62vh] overflow-y-auto rounded-xl border border-line bg-[rgba(43,34,26,0.04)] px-4 py-3">
                       <ReactMarkdown remarkPlugins={[remarkGfm]}>{draft || "*Nothing here yet.*"}</ReactMarkdown>
                     </div>
                   ) : (
@@ -276,7 +276,7 @@ export function KnowledgeView({ files }: { files: KnowledgeFile[] }) {
                     loading={deleting}
                     onClick={remove}
                     aria-label={`Delete ${selected.path}`}
-                    className="px-2 text-bad hover:text-bad hover:bg-[rgba(239,116,102,0.12)]"
+                    className="px-2 text-bad hover:text-bad hover:bg-[rgba(207,75,59,0.12)]"
                   >
                     <Trash2 className="h-3.5 w-3.5" />
                   </Button>
@@ -369,7 +369,7 @@ function FileRow({
         "w-full flex items-center gap-2 rounded-xl border px-2.5 py-2 text-left text-[12.5px] transition-all",
         active
           ? "text-cream bg-[rgba(196,99,58,0.13)] border-[rgba(196,99,58,0.25)]"
-          : "text-cream-muted border-transparent hover:text-cream hover:bg-[rgba(244,237,227,0.04)]"
+          : "text-cream-muted border-transparent hover:text-cream hover:bg-[rgba(43,34,26,0.04)]"
       )}
     >
       <FileText className={cn("h-3.5 w-3.5 shrink-0", active ? "text-amber" : "text-cream-faint")} />
@@ -377,7 +377,7 @@ function FileRow({
       {agent && (
         <span
           className="dot shrink-0 bg-eucalyptus"
-          style={{ width: 6, height: 6, boxShadow: "0 0 10px 1.5px rgba(111,191,148,0.8)" }}
+          style={{ width: 6, height: 6, boxShadow: "0 0 10px 1.5px rgba(63,146,104,0.8)" }}
           title="last updated by the agent"
         />
       )}

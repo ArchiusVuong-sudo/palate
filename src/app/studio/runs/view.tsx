@@ -125,7 +125,7 @@ export function RunsView({ runs }: { runs: RunRow[] }) {
             >
               <div
                 aria-hidden
-                className="absolute inset-0 rounded-2xl border-2 border-[rgba(232,185,79,0.45)] animate-pulse pointer-events-none"
+                className="absolute inset-0 rounded-2xl border-2 border-[rgba(185,138,35,0.45)] animate-pulse pointer-events-none"
               />
               <Card className="p-4 sm:p-5">
                 <div className="flex items-center gap-3 flex-wrap">
@@ -238,7 +238,7 @@ function RunCard({ run, expanded, onToggle }: { run: RunRow; expanded: boolean; 
           />
         </div>
         <div className="mt-3 flex items-center gap-x-4 gap-y-1.5 flex-wrap text-[11px] text-cream-faint">
-          <span className="font-mono rounded-md border border-line bg-[rgba(244,237,227,0.04)] px-2 py-0.5 text-[10px] text-cream-muted">
+          <span className="font-mono rounded-md border border-line bg-[rgba(43,34,26,0.04)] px-2 py-0.5 text-[10px] text-cream-muted">
             {run.model ?? "—"}
           </span>
           <span className="font-mono">{run.turns} turns</span>
@@ -275,7 +275,7 @@ function RunCard({ run, expanded, onToggle }: { run: RunRow; expanded: boolean; 
               <div>
                 <p className="text-[10px] uppercase tracking-[0.18em] text-cream-faint mb-1.5">Mission prompt</p>
                 {run.prompt ? (
-                  <pre className="font-mono text-[11px] leading-relaxed text-cream-muted whitespace-pre-wrap bg-[rgba(0,0,0,0.3)] border border-line rounded-xl p-3 max-h-64 overflow-y-auto">
+                  <pre className="font-mono text-[11px] leading-relaxed text-cream-muted whitespace-pre-wrap bg-[rgba(43,34,26,0.05)] border border-line rounded-xl p-3 max-h-64 overflow-y-auto">
                     {run.prompt}
                   </pre>
                 ) : (

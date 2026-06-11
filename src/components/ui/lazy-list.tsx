@@ -60,7 +60,7 @@ export function ShowMoreButton({
     <div className={cn("flex justify-center", className)}>
       <button
         onClick={onClick}
-        className="inline-flex items-center gap-1.5 rounded-full border border-line px-4 py-1.5 text-[11px] text-cream-muted hover:text-cream hover:border-line-strong hover:bg-[rgba(244,237,227,0.04)] transition-all"
+        className="inline-flex items-center gap-1.5 rounded-full border border-line px-4 py-1.5 text-[11px] text-cream-muted hover:text-cream hover:border-line-strong hover:bg-[rgba(43,34,26,0.04)] transition-all"
       >
         <ChevronDown className="h-3 w-3" />
         {label ?? `Show ${Math.min(remaining, 12)} more`}

@@ -11,7 +11,7 @@ import {
 } from "recharts";
 import { cn, fmtNumber } from "@/lib/format";
 
-const PALETTE = ["#e8a062", "#6fbf94", "#7fb5d6", "#c4633a", "#e8b94f", "#b58ad6"];
+const PALETTE = ["#e8a062", "#6fbf94", "#4f87ad", "#c4633a", "#b98a23", "#b58ad6"];
 
 function useMounted() {
   const [m, setM] = React.useState(false);
@@ -26,10 +26,10 @@ export type HeatmapDay = { day: string; count: number; avg_sentiment: number | n
 const DOW_LABELS = ["Mon", "", "Wed", "", "Fri", "", ""];
 
 function cellColor(d: HeatmapDay, max: number): string {
-  if (d.count === 0) return "rgba(244,237,227,0.05)";
+  if (d.count === 0) return "rgba(43,34,26,0.05)";
   const t = 0.3 + 0.7 * Math.min(1, d.count / Math.max(1, max));
   const s = d.avg_sentiment;
-  const base = s !== null && s < -0.15 ? "239,116,102" : s !== null && s > 0.15 ? "111,191,148" : "232,160,98";
+  const base = s !== null && s < -0.15 ? "207,75,59" : s !== null && s > 0.15 ? "63,146,104" : "217,122,63";
   return `rgba(${base},${t.toFixed(2)})`;
 }
 
@@ -83,7 +83,7 @@ export function ActivityHeatmap({ data, className }: { data: HeatmapDay[]; class
                       onMouseLeave={() => setHover(null)}
                       className={cn(
                         "h-[13px] w-[13px] shrink-0 rounded-[3px] transition-transform",
-                        d && d.count > 0 && "hover:scale-125 hover:ring-1 hover:ring-[rgba(244,237,227,0.5)]"
+                        d && d.count > 0 && "hover:scale-125 hover:ring-1 hover:ring-[rgba(43,34,26,0.5)]"
                       )}
                       style={{ background: d ? cellColor(d, max) : "transparent" }}
                     />
@@ -110,7 +110,7 @@ export function ActivityHeatmap({ data, className }: { data: HeatmapDay[]; class
             <span>quiet</span>
             <span className="flex gap-[3px]">
               {[0.12, 0.3, 0.55, 0.8, 1].map((t) => (
-                <span key={t} className="h-[10px] w-[10px] rounded-[2.5px]" style={{ background: `rgba(232,160,98,${t})` }} />
+                <span key={t} className="h-[10px] w-[10px] rounded-[2.5px]" style={{ background: `rgba(201,127,61,${t})` }} />
               ))}
             </span>
             <span>busy · green positive · red negative</span>
@@ -126,7 +126,7 @@ export function ActivityHeatmap({ data, className }: { data: HeatmapDay[]; class
 function RadarTooltip({ active, payload, label }: { active?: boolean; payload?: Array<{ name: string; value: number | string; color?: string }>; label?: string }) {
   if (!active || !payload?.length) return null;
   return (
-    <div className="rounded-xl border border-line-strong bg-[rgba(12,15,13,0.95)] px-3 py-2 shadow-2xl backdrop-blur-md">
+    <div className="rounded-xl border border-line-strong bg-[rgba(255,255,255,0.97)] px-3 py-2 shadow-2xl backdrop-blur-md">
       {label !== undefined && <p className="text-[10px] uppercase tracking-wider text-cream-faint mb-1">{label}</p>}
       <div className="grid grid-cols-1 gap-0.5">
         {payload.map((p, i) => (
@@ -153,10 +153,10 @@ export function RadarCompare({
   return (
     <ResponsiveContainer width="100%" height={height}>
       <RadarChart data={data} cx="50%" cy="50%" outerRadius="74%">
-        <PolarGrid stroke="rgba(244,237,227,0.1)" />
+        <PolarGrid stroke="rgba(43,34,26,0.1)" />
         <PolarAngleAxis
           dataKey="metric"
-          tick={{ fill: "rgba(244,237,227,0.55)", fontSize: 10.5, fontFamily: "var(--font-geist-mono)" }}
+          tick={{ fill: "rgba(43,34,26,0.55)", fontSize: 10.5, fontFamily: "var(--font-geist-mono)" }}
         />
         <Tooltip content={<RadarTooltip />} />
         {series.map((s, i) => {

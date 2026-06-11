@@ -106,7 +106,7 @@ export function RunConsole({
         )}
 
         {state.error && (
-          <div className="rounded-xl border border-[rgba(239,116,102,0.3)] bg-[rgba(239,116,102,0.08)] px-3 py-2 text-xs text-bad">
+          <div className="rounded-xl border border-[rgba(207,75,59,0.3)] bg-[rgba(207,75,59,0.08)] px-3 py-2 text-xs text-bad">
             {state.error}
           </div>
         )}
@@ -145,7 +145,7 @@ function FollowUpBox({ onSend }: { onSend: (text: string) => Promise<void> | voi
     }
   };
   return (
-    <div className="mt-2 flex items-center gap-1.5 rounded-xl border border-line bg-[rgba(0,0,0,0.2)] focus-within:border-[rgba(111,191,148,0.45)] transition-colors pl-2.5 pr-1 py-1">
+    <div className="mt-2 flex items-center gap-1.5 rounded-xl border border-line bg-[rgba(43,34,26,0.04)] focus-within:border-[rgba(63,146,104,0.45)] transition-colors pl-2.5 pr-1 py-1">
       <Sparkles className="h-3 w-3 text-eucalyptus shrink-0" />
       <input
         value={text}
@@ -177,7 +177,7 @@ function CollapsibleText({ text }: { text: string }) {
       <div className={cn("prose-palate relative overflow-hidden transition-all", !open && "max-h-28")}>
         <ReactMarkdown remarkPlugins={[remarkGfm]}>{text}</ReactMarkdown>
         {!open && (
-          <div className="absolute inset-x-0 bottom-0 h-12 bg-gradient-to-t from-[#101412] to-transparent pointer-events-none" />
+          <div className="absolute inset-x-0 bottom-0 h-12 bg-gradient-to-t from-[#ffffff] to-transparent pointer-events-none" />
         )}
       </div>
       <button
@@ -230,10 +230,10 @@ function ToolRow({ seg }: { seg: Extract<TimelineSegment, { kind: "tool" }> }) {
   const Icon = TOOL_ICONS[seg.name] ?? Wrench;
   const label = TOOL_LABELS[seg.name] ?? seg.name;
   return (
-    <div className="rounded-xl border border-line/70 bg-[rgba(244,237,227,0.025)] overflow-hidden">
+    <div className="rounded-xl border border-line/70 bg-[rgba(43,34,26,0.025)] overflow-hidden">
       <button
         onClick={() => setOpen((o) => !o)}
-        className="w-full flex items-center gap-2.5 px-3 py-2 text-left hover:bg-[rgba(244,237,227,0.03)]"
+        className="w-full flex items-center gap-2.5 px-3 py-2 text-left hover:bg-[rgba(43,34,26,0.03)]"
       >
         {seg.done ? (
           seg.isError ? <XCircle className="h-3.5 w-3.5 text-bad shrink-0" /> : <CheckCircle2 className="h-3.5 w-3.5 text-good shrink-0" />
@@ -312,8 +312,8 @@ export function ApprovalCard({
     <div className={cn(
       "rounded-2xl border p-3.5 transition-colors",
       resolved
-        ? "border-line bg-[rgba(244,237,227,0.02)]"
-        : "border-[rgba(232,160,98,0.4)] bg-[rgba(196,99,58,0.06)] accent-ring"
+        ? "border-line bg-[rgba(43,34,26,0.02)]"
+        : "border-[rgba(201,127,61,0.4)] bg-[rgba(196,99,58,0.06)] accent-ring"
     )}>
       <div className="flex items-center gap-2 mb-2">
         <MessageSquareWarning className={cn("h-4 w-4", resolved ? "text-cream-faint" : "text-amber")} />
@@ -357,7 +357,7 @@ export function ApprovalCard({
             value={note}
             onChange={(e) => setNote(e.target.value)}
             placeholder="Optional note for the agent (it learns from this)…"
-            className="h-8 w-full rounded-lg bg-[rgba(0,0,0,0.25)] border border-line px-2.5 text-xs text-cream placeholder:text-cream-faint focus:border-[rgba(196,99,58,0.5)]"
+            className="h-8 w-full rounded-lg bg-[rgba(43,34,26,0.04)] border border-line px-2.5 text-xs text-cream placeholder:text-cream-faint focus:border-[rgba(196,99,58,0.5)]"
           />
           <div className="flex flex-wrap gap-2">
             {approval.options.map((opt) => {

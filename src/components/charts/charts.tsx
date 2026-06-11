@@ -13,10 +13,10 @@ import { motion } from "framer-motion";
 import { ArrowDownRight, ArrowUpRight, Minus } from "lucide-react";
 import { cn, fmtNumber } from "@/lib/format";
 
-export const PALETTE = ["#e8a062", "#6fbf94", "#7fb5d6", "#c4633a", "#e8b94f", "#b58ad6", "#5ad48e", "#ef7466"];
+export const PALETTE = ["#e8a062", "#6fbf94", "#4f87ad", "#c4633a", "#b98a23", "#b58ad6", "#2f9e63", "#cf4b3b"];
 
-const AXIS = { stroke: "rgba(244,237,227,0.28)", fontSize: 10.5, fontFamily: "var(--font-geist-mono)" };
-const GRID = "rgba(244,237,227,0.06)";
+const AXIS = { stroke: "rgba(43,34,26,0.5)", fontSize: 10.5, fontFamily: "var(--font-geist-mono)" };
+const GRID = "rgba(43,34,26,0.08)";
 
 /** ResponsiveContainer measures -1×-1 during SSR and logs a warning — only render charts after mount. */
 function useMounted() {
@@ -28,7 +28,7 @@ function useMounted() {
 function GlassTooltip({ active, payload, label }: { active?: boolean; payload?: Array<{ name: string; value: number | string; color?: string }>; label?: string }) {
   if (!active || !payload?.length) return null;
   return (
-    <div className="rounded-xl border border-line-strong bg-[rgba(12,15,13,0.95)] px-3 py-2 shadow-2xl backdrop-blur-md">
+    <div className="rounded-xl border border-line-strong bg-[rgba(255,255,255,0.97)] px-3 py-2 shadow-2xl backdrop-blur-md">
       {label !== undefined && <p className="text-[10px] uppercase tracking-wider text-cream-faint mb-1">{label}</p>}
       <div className="grid gap-0.5">
         {payload.map((p, i) => (
@@ -91,7 +91,7 @@ export function MetricCard({
     >
       <div
         className="absolute -top-10 -right-10 h-28 w-28 rounded-full blur-3xl opacity-25 pointer-events-none"
-        style={{ background: tone === "good" ? "#5ad48e" : tone === "bad" ? "#ef7466" : "#c4633a" }}
+        style={{ background: tone === "good" ? "#2f9e63" : tone === "bad" ? "#cf4b3b" : "#c4633a" }}
       />
       <p className="text-[11px] uppercase tracking-[0.14em] text-cream-faint">{label}</p>
       <div className="mt-1.5 flex items-baseline gap-2">
@@ -114,7 +114,7 @@ export function MetricCard({
           {mounted && (
             <ResponsiveContainer width="100%" height="100%">
               <LineChart data={spark.map((v, i) => ({ i, v }))}>
-                <Line type="monotone" dataKey="v" stroke={tone === "bad" ? "#ef7466" : "#6fbf94"} strokeWidth={1.5} dot={false} isAnimationActive animationDuration={1200} />
+                <Line type="monotone" dataKey="v" stroke={tone === "bad" ? "#cf4b3b" : "#3f9268"} strokeWidth={1.5} dot={false} isAnimationActive animationDuration={1200} />
               </LineChart>
             </ResponsiveContainer>
           )}
@@ -161,7 +161,7 @@ export function TrendArea({
         <CartesianGrid stroke={GRID} vertical={false} />
         <XAxis dataKey="label" tick={AXIS} tickLine={false} axisLine={false} minTickGap={24} />
         <YAxis tick={AXIS} tickLine={false} axisLine={false} width={46} />
-        <Tooltip content={<GlassTooltip />} cursor={{ stroke: "rgba(244,237,227,0.15)" }} />
+        <Tooltip content={<GlassTooltip />} cursor={{ stroke: "rgba(43,34,26,0.15)" }} />
         {series.map((s, i) => (
           <Area
             key={s.key}
@@ -200,7 +200,7 @@ export function TopicBars({
         <CartesianGrid stroke={GRID} horizontal={false} />
         <XAxis type="number" tick={AXIS} tickLine={false} axisLine={false} allowDecimals={false} />
         <YAxis type="category" dataKey="name" tick={{ ...AXIS, fontSize: 11, fontFamily: "var(--font-geist-sans)" }} tickLine={false} axisLine={false} width={120} />
-        <Tooltip content={<GlassTooltip />} cursor={{ fill: "rgba(244,237,227,0.04)" }} />
+        <Tooltip content={<GlassTooltip />} cursor={{ fill: "rgba(43,34,26,0.04)" }} />
         <Bar dataKey="value" name="mentions" radius={[0, 6, 6, 0]} isAnimationActive animationDuration={900} barSize={16}>
           {data.map((_, i) => (
             <Cell key={i} fill={i === 0 ? color : `${color}${Math.max(30, 95 - i * 12).toString(16).padStart(2, "0")}`} />
@@ -227,7 +227,7 @@ export function SimpleBars({
         <CartesianGrid stroke={GRID} vertical={false} />
         <XAxis dataKey="label" tick={AXIS} tickLine={false} axisLine={false} />
         <YAxis tick={AXIS} tickLine={false} axisLine={false} width={46} />
-        <Tooltip content={<GlassTooltip />} cursor={{ fill: "rgba(244,237,227,0.04)" }} />
+        <Tooltip content={<GlassTooltip />} cursor={{ fill: "rgba(43,34,26,0.04)" }} />
         {series.map((s, i) => (
           <Bar key={s.key} dataKey={s.key} name={s.name} fill={s.color ?? PALETTE[i]} radius={[5, 5, 0, 0]} isAnimationActive animationDuration={900} barSize={18} />
         ))}
@@ -274,11 +274,11 @@ export function Donut({
 export function ScoreRing({ score, size = 64, label }: { score: number; size?: number; label?: string }) {
   const r = (size - 8) / 2;
   const c = 2 * Math.PI * r;
-  const color = score >= 75 ? "#5ad48e" : score >= 50 ? "#e8b94f" : "#ef7466";
+  const color = score >= 75 ? "#2f9e63" : score >= 50 ? "#b98a23" : "#cf4b3b";
   return (
     <div className="flex flex-col items-center gap-1">
       <svg width={size} height={size} className="-rotate-90">
-        <circle cx={size / 2} cy={size / 2} r={r} fill="none" stroke="rgba(244,237,227,0.08)" strokeWidth={5} />
+        <circle cx={size / 2} cy={size / 2} r={r} fill="none" stroke="rgba(43,34,26,0.08)" strokeWidth={5} />
         <motion.circle
           cx={size / 2} cy={size / 2} r={r} fill="none" stroke={color} strokeWidth={5} strokeLinecap="round"
           strokeDasharray={c}

@@ -113,7 +113,7 @@ export function BlockRenderer({ block, compact }: { block: CanvasBlock; compact?
               </thead>
               <tbody>
                 {rows.map((row, ri) => (
-                  <tr key={ri} className="hover:bg-[rgba(244,237,227,0.03)]">
+                  <tr key={ri} className="hover:bg-[rgba(43,34,26,0.03)]">
                     {row.map((cell, ci) => (
                       <td key={ci} className={cn("px-2.5 py-2 border-b border-line/50 text-cream-muted", ci === 0 && "text-cream")}>
                         {renderCell(cell)}
@@ -138,7 +138,7 @@ export function BlockRenderer({ block, compact }: { block: CanvasBlock; compact?
                 initial={{ opacity: 0, x: -8 }}
                 animate={{ opacity: 1, x: 0 }}
                 transition={{ delay: i * 0.05 }}
-                className="flex items-center gap-3 rounded-xl border border-line/60 bg-[rgba(244,237,227,0.025)] px-3 py-2"
+                className="flex items-center gap-3 rounded-xl border border-line/60 bg-[rgba(43,34,26,0.025)] px-3 py-2"
               >
                 <span className="font-mono text-[10px] text-cream-faint w-4">{i + 1}</span>
                 <div className="min-w-0 flex-1">
