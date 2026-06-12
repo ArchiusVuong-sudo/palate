@@ -8,10 +8,10 @@ import * as React from "react";
 import Link from "next/link";
 import { motion, type Variants } from "framer-motion";
 import {
-  ArrowRight, BarChart3, BookOpen, CheckCircle2, ChevronRight, CircleDashed,
-  CornerDownRight, Ear, FileText, GraduationCap, Image as ImageIcon,
-  MessageSquareWarning, MousePointerClick, Palette, Quote, Search,
-  ShieldCheck, Sparkles,
+  ArrowRight, BarChart3, BellRing, BookOpen, CheckCircle2, ChevronRight, CircleDashed,
+  CornerDownRight, Ear, FileText, Globe, GraduationCap, History, Image as ImageIcon,
+  MessageCircle, MessageSquareWarning, MousePointerClick, Palette, Quote, Search,
+  ShieldCheck, Sparkles, Wallet,
 } from "lucide-react";
 import { LogoMark } from "@/components/studio/shell";
 import { cn } from "@/lib/format";
@@ -438,10 +438,53 @@ function HumansInTheLoop() {
             visual={<EvidenceVisual />}
           />
         </div>
+
+        {/* the small things that show we thought about the user */}
+        <motion.h3 {...fadeUp(0)} className="mt-24 text-center text-2xl text-cream" style={display}>
+          …and the small things that show <em className="text-gradient">we thought about you</em>
+        </motion.h3>
+        <div className="mt-10 grid sm:grid-cols-2 lg:grid-cols-3 gap-5">
+          {CARE.map((c, i) => (
+            <motion.div key={c.title} {...fadeUp(i * 0.06)} className="glass glass-hover rounded-2xl p-5">
+              <span className="inline-flex h-9 w-9 items-center justify-center rounded-xl border border-[rgba(63,146,104,0.3)] bg-[rgba(63,146,104,0.1)]">
+                <c.icon className="h-4 w-4 text-eucalyptus" />
+              </span>
+              <h4 className="mt-3.5 text-[15px] font-medium text-cream">{c.title}</h4>
+              <p className="mt-1.5 text-[12.5px] leading-relaxed text-cream-muted">{c.copy}</p>
+            </motion.div>
+          ))}
+        </div>
       </div>
     </section>
   );
 }
+
+const CARE = [
+  {
+    icon: Globe, title: "It sets itself up, with you",
+    copy: "The agent opens a real Chrome window and walks the Google and Meta setup pages with you. You do every sign-in — it never sees a password — and it saves the keys when they appear.",
+  },
+  {
+    icon: BellRing, title: "Decisions find you",
+    copy: "A glowing “decision waiting” button on every page, a corner widget, the browser-tab title and a notification. You will never discover a stuck question three hours late.",
+  },
+  {
+    icon: MessageCircle, title: "Talk to it like a teammate",
+    copy: "The copilot answers with your real numbers, searches the web when a job needs outside context, and treats every correction as a rule to keep — permanently.",
+  },
+  {
+    icon: Sparkles, title: "One click carries the context",
+    copy: "“Ask Palate” buttons sit on every review, insight and post. Click one and the chat opens pre-filled with the whole item — no copy-pasting, no re-explaining.",
+  },
+  {
+    icon: History, title: "Pick up where you left off",
+    copy: "Any finished run can be continued — even days later, the agent still remembers everything about that job. Conversations resume the same way.",
+  },
+  {
+    icon: Wallet, title: "Every dollar on the receipt",
+    copy: "Each run shows its cost, every tool call is logged, and a hard budget cap is built in. You always know what the agent did and what it spent doing it.",
+  },
+];
 
 function FeatureRow({
   icon: Icon, title, copy, visual, flip,
